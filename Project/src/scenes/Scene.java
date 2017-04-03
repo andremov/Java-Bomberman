@@ -20,12 +20,9 @@ import model.Handler;
  */
 public abstract class Scene {
 
-	protected static final int ssX = (int) (pokemonviolet.model.Handler.SCREEN_SIZE_X / pokemonviolet.model.Handler.RESIZE);
-	protected static final int ssY = (int) (pokemonviolet.model.Handler.SCREEN_SIZE_Y / pokemonviolet.model.Handler.RESIZE);
 	protected final Handler main;
 	private final String name;
 	private final boolean full;
-	protected final static float RESIZE = pokemonviolet.model.Handler.RESIZE;
 
 	public Scene(Handler main, String name, boolean full) {
 		this.main = main;
@@ -59,13 +56,13 @@ public abstract class Scene {
 	 * @throws IOException
 	 */
 	protected BufferedImage genWindow(int theme, double dimX, double dimY) throws IOException {
-		int dimXint = resizedValue(dimX);
-		int dimYint = resizedValue(dimY);
+		int dimXint = (int) dimX;
+		int dimYint = (int) dimY;
 		
 		BufferedImage window = new BufferedImage(dimXint, dimYint, BufferedImage.TYPE_INT_ARGB);
 		Graphics g = window.getGraphics();
 
-		int pieceDim = (int) (RESIZE * 7);
+		int pieceDim = 7;
 
 		if (dimXint < pieceDim * 2) {
 			dimXint = pieceDim * 2;
@@ -119,10 +116,6 @@ public abstract class Scene {
 	 */
 	public boolean isFull() {
 		return full;
-	}
-	
-	protected int resizedValue(double unitValue) {
-		return (int) (unitValue * RESIZE);
 	}
 	
 	protected String[] genMultilineText(String originalText, int charsInLine) {

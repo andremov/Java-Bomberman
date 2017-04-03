@@ -3,13 +3,14 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/Developer/NetBeans/Bomberman/src/model/Handler.java</file>
-            <file>file:/D:/Developer/NetBeans/Bomberman/src/bomberman/Bomberman.java</file>
-            <file>file:/D:/Developer/NetBeans/Bomberman/src/scenes/Scene.java</file>
-            <file>file:/D:/Developer/NetBeans/Bomberman/src/view/Parser.java</file>
-            <file>file:/D:/Developer/NetBeans/Bomberman/src/view/Window.java</file>
-            <file>file:/D:/Developer/NetBeans/Bomberman/src/data/NIC.java</file>
-            <file>file:/D:/Developer/NetBeans/Bomberman/src/view/Display.java</file>
+            <file>file:/D:/Developer/NetBeans/Java-Bomberman/Project/src/model/Handler.java</file>
+            <file>file:/D:/Developer/NetBeans/Java-Bomberman/Project/src/scenes/Scene.java</file>
+            <file>file:/D:/Developer/NetBeans/Java-Bomberman/Project/src/view/Display.java</file>
+            <file>file:/D:/Developer/NetBeans/Java-Bomberman/Project/src/model/Map.java</file>
+            <file>file:/D:/Developer/NetBeans/Java-Bomberman/Project/src/model/Player.java</file>
+            <file>file:/D:/Developer/NetBeans/Java-Bomberman/Project/src/scenes/Game.java</file>
+            <file>file:/D:/Developer/NetBeans/Java-Bomberman/Project/src/view/Window.java</file>
+            <file>file:/D:/Developer/NetBeans/Java-Bomberman/Project/src/view/Parser.java</file>
         </group>
     </open-files>
 </project-private>

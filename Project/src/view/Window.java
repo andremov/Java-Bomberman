@@ -7,6 +7,7 @@ package view;
 
 import control.KeyHandler;
 import javax.swing.JFrame;
+import model.Handler;
 
 /**
  *
@@ -16,20 +17,19 @@ public class Window extends JFrame {
 
 	Display canvas;
 	
-	public Window() {
+	public Window(Handler h) {
 		setLayout(null);
-		setSize(500,500);
+		setSize(h.SCREEN_SIZE,h.SCREEN_SIZE);
 		setLocationRelativeTo(null);
 		setTitle("Adivinador");
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setResizable(false);
 		setUndecorated(true);
 		
-		addKeyListener(new KeyHandler());
+		addKeyListener(new KeyHandler(h));
 		
-		canvas = new Display();
-		canvas.setSize(300,300);
-		canvas.setSize(1,1);
+		canvas = new Display(h);
+//		canvas.setSize(h.getCanvasSize(),h.getCanvasSize());
 		add(canvas);
 		
 		setVisible(true);

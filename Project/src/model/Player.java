@@ -3,21 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package view;
-
-import java.awt.Canvas;
-import model.Handler;
+package model;
 
 /**
  *
  * @author Andres
  */
-public class Display extends Canvas {
-
-	private Handler h;
-	
-	public Display(Handler h) {
-		this.h = h;
-	}
+public class Player {
 	
 }

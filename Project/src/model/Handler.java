@@ -20,16 +20,9 @@ public class Handler {
 	// <editor-fold defaultstate="collapsed" desc="Attributes">
 		// <editor-fold defaultstate="collapsed" desc="Statics">
 			/**
-			 * Canvas size in X dimension.
+			 * Window size in X dimension.
 			 */
-			public static int SCREEN_SIZE_X;
-			/**
-			 * Canvas size in Y dimension.
-			 */
-			public static int SCREEN_SIZE_Y;
-			
-			public static int BASE_SCREEN_SIZE_X = 240;
-			public static int BASE_SCREEN_SIZE_Y = 160;
+			public static int SCREEN_SIZE;
 		//</editor-fold>
 
 		/**
@@ -40,7 +33,7 @@ public class Handler {
 		 * List of states.
 		 */
 		public static ArrayList<Scene> gameState;
-		private GameWindow gw;
+		private Window gw;
 	// </editor-fold>
 
 	/**
@@ -50,15 +43,18 @@ public class Handler {
 	public Handler() {
 		gameState = new ArrayList<Scene>();
 		
-		SCREEN_SIZE_X = (int) (BASE_SCREEN_SIZE_X * RESIZE);
-		SCREEN_SIZE_Y = (int) (BASE_SCREEN_SIZE_Y * RESIZE);
+		SCREEN_SIZE = 600;
 		
-		gw = new GameWindow(SCREEN_SIZE_X, SCREEN_SIZE_Y);
+		gw = new Window(this);
 
-		
-		gameState.add(new pokemonviolet.scenes.Title(this, true));
+		gameState.add(new scenes.Game(this, true));
 	}
-
+	
+	public Scene getLastScene() {
+		return gameState.get(gameState.size()-1);
+	}
+	
+	/*
 	public void canContinue() {
 		gw.setVisible(true);
 		gw.startCanvasThread();
@@ -87,6 +83,6 @@ public class Handler {
 		
 		return player;
 	}
-	
+	*/
 	
 }

@@ -10,6 +10,7 @@ package control;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import javax.swing.JOptionPane;
+import model.Handler;
 
 /**
  *
@@ -17,16 +18,26 @@ import javax.swing.JOptionPane;
  */
 public class KeyHandler extends KeyAdapter {
 	
+	private Handler h;
+
+	public KeyHandler(Handler h) {
+		this.h = h;
+	}
+	
 	private final static boolean doExitCheck = false;
 	
 	public final static int ACTION_NONE = 0;
-	public final static int ACTION_A = 1;
-	public final static int ACTION_B = 2;
-	public final static int ACTION_START = 3;
-	public final static int ACTION_UP = 4;
-	public final static int ACTION_DOWN = 5;
-	public final static int ACTION_LEFT = 6;
-	public final static int ACTION_RIGHT = 7;
+	
+	public final static int ACTION_UP = 1;
+	public final static int ACTION_DOWN = 2;
+	public final static int ACTION_LEFT = 3;
+	public final static int ACTION_RIGHT = 4;
+	
+	public final static int ACTION_A = 5;
+	public final static int ACTION_B = 6;
+	public final static int ACTION_START = 7;
+	public final static int ACTION_BACK = 7;
+	
 	public final static int STATE_PRESS = 0;
 	public final static int STATE_RELEASE = 1;
 	
@@ -57,6 +68,8 @@ public class KeyHandler extends KeyAdapter {
 			acceptedKey = true;
 			sendAction = ACTION_START;
 		} else if (key.getKeyCode() == KeyEvent.VK_ESCAPE) {
+			acceptedKey = true;
+			sendAction = ACTION_BACK;
 			if (doExitCheck) {
 				String[] options = {"SI","NO"};
 				int n = JOptionPane.showOptionDialog(null,"Desea cerrar?","",JOptionPane.YES_NO_OPTION,JOptionPane.QUESTION_MESSAGE,null,options,"");
@@ -69,7 +82,7 @@ public class KeyHandler extends KeyAdapter {
 		}
 
 		if (acceptedKey) {
-//			pokemonviolet.model.Handler.gameState.get(pokemonviolet.model.Handler.gameState.size() - 1).receiveKeyAction(sendAction, STATE_RELEASE);
+			h.getLastScene().receiveKeyAction(sendAction, STATE_RELEASE);
 		}
 	}
 	
@@ -93,16 +106,10 @@ public class KeyHandler extends KeyAdapter {
 		} else if (key.getKeyCode() == KeyEvent.VK_K) {
 			acceptedKey = true;
 			sendAction = ACTION_B;
-		} else if (key.getKeyCode() == KeyEvent.VK_J) {
-			acceptedKey = true;
-			sendAction = ACTION_A;
-		} else if (key.getKeyCode() == KeyEvent.VK_ENTER) {
-			acceptedKey = true;
-			sendAction = ACTION_START;
 		}
 
 		if (acceptedKey) {
-//			pokemonviolet.model.Handler.gameState.get(pokemonviolet.model.Handler.gameState.size() - 1).receiveKeyAction(sendAction, STATE_PRESS);
+			h.getLastScene().receiveKeyAction(sendAction, STATE_PRESS);
 		}
 	}
 }

@@ -18,12 +18,6 @@ import model.Handler;
  */
 public class KeyHandler extends KeyAdapter {
 	
-	private Handler h;
-
-	public KeyHandler(Handler h) {
-		this.h = h;
-	}
-	
 	private final static boolean doExitCheck = false;
 	
 	public final static int ACTION_NONE = 0;
@@ -82,7 +76,7 @@ public class KeyHandler extends KeyAdapter {
 		}
 
 		if (acceptedKey) {
-			h.getLastScene().receiveKeyAction(sendAction, STATE_RELEASE);
+			Handler.currentScene.receiveKeyAction(sendAction, STATE_RELEASE);
 		}
 	}
 	
@@ -109,7 +103,7 @@ public class KeyHandler extends KeyAdapter {
 		}
 
 		if (acceptedKey) {
-			h.getLastScene().receiveKeyAction(sendAction, STATE_PRESS);
+			Handler.currentScene.receiveKeyAction(sendAction, STATE_PRESS);
 		}
 	}
 }

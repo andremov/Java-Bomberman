@@ -7,7 +7,6 @@
  */
 package model;
 
-import java.util.ArrayList;
 import scenes.Scene;
 import view.Window;
 
@@ -18,13 +17,11 @@ import view.Window;
 public class Handler {
 
 	// <editor-fold defaultstate="collapsed" desc="Attributes">
-		// <editor-fold defaultstate="collapsed" desc="Statics">
-			/**
-			 * Window size in X dimension.
-			 */
-			public static int SCREEN_SIZE;
-		//</editor-fold>
-
+		/**
+		 * Window size in X dimension.
+		 */
+		public static int SCREEN_SIZE;
+		public static int TILE_SIZE = 16;
 		/**
 		 * Current battle handler.
 		 */
@@ -32,26 +29,26 @@ public class Handler {
 		/**
 		 * List of states.
 		 */
-		public static ArrayList<Scene> gameState;
-		private Window gw;
+		public static Scene currentScene;
 	// </editor-fold>
-
+	
+	public static Player[] players;
+	public static int numPlayers;
+	private Window gameWindow;
+	
 	/**
 	 * Build game.
 	 * @float resize Resize factor of window.
 	 */
 	public Handler() {
-		gameState = new ArrayList<Scene>();
-		
 		SCREEN_SIZE = 600;
+		numPlayers = 1;
+		players = new Player[4];
+		players[0] = new Player(1);
+		gameWindow = new Window(this);
+		gameWindow.startCanvas();
 		
-		gw = new Window(this);
-
-		gameState.add(new scenes.Game(this, true));
-	}
-	
-	public Scene getLastScene() {
-		return gameState.get(gameState.size()-1);
+		currentScene = (new scenes.Game(this, true));
 	}
 	
 	/*
@@ -62,9 +59,9 @@ public class Handler {
 	
 	public void clearStates(String limit) {
 		boolean pullOut = true;
-		while (pullOut && gameState.get(gameState.size() - 1).getName().compareTo(limit) != 0) {
-			gameState.get(gameState.size() - 1).dispose();
-			pullOut = !gameState.isEmpty();
+		while (pullOut && currentScene.get(currentScene.size() - 1).getName().compareTo(limit) != 0) {
+			currentScene.get(currentScene.size() - 1).dispose();
+			pullOut = !currentScene.isEmpty();
 		}
 	}
 	
@@ -72,9 +69,9 @@ public class Handler {
 		pokemonviolet.model.Player player = null;
 		boolean found = false;
 		int counter = 0;
-		while (!found && counter < gameState.size()) {
-			if (gameState.get(counter).getName().compareTo("GAME") == 0) {
-				player = ((pokemonviolet.scenes.Game) gameState.get(counter)).getPlayer();
+		while (!found && counter < currentScene.size()) {
+			if (currentScene.get(counter).getName().compareTo("GAME") == 0) {
+				player = ((pokemonviolet.scenes.Game) currentScene.get(counter)).getPlayer();
 				found = true;
 			} else {
 				counter = counter + 1;

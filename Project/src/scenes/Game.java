@@ -6,9 +6,11 @@
 package scenes;
 
 import control.KeyHandler;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import model.Handler;
+import model.Map;
 
 /**
  *
@@ -16,8 +18,15 @@ import model.Handler;
  */
 public class Game extends Scene {
 
+	Map gameMap;
+	
 	public Game(Handler main, boolean full) {
 		super(main, "Game", full);
+		
+		gameMap = new Map();
+		for (int i = 0; i < Handler.numPlayers; i++) {
+			Handler.players[i].setXY(20,20);
+		}
 	}
 
 	@Override
@@ -49,7 +58,17 @@ public class Game extends Scene {
 
 	@Override
 	public BufferedImage getDisplay() throws IOException {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+		int mapSize = Handler.TILE_SIZE*data.NIC.SIZE_MAP;
+		BufferedImage image = new BufferedImage(mapSize, mapSize, BufferedImage.TYPE_INT_ARGB);
+		Graphics g = image.getGraphics();
+		
+		g.drawImage(gameMap.getDisplay(), 0, 0, mapSize, mapSize, null);
+		
+		for (int i = 0; i < Handler.numPlayers; i++) {
+			g.drawImage(Handler.players[i].getDisplay(),Handler.players[i].getX(),Handler.players[i].getY(),null);
+		}
+		
+		return image;
 	}
 	
 }

@@ -3,20 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package bomberman;
+package model;
+
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 /**
  *
  * @author Andres
  */
-public class Bomberman {
-
-	/**
-	 * @param args the command line arguments
-	 */
-	public static void main(String[] args) {
-		data.NIC.loadAllData();
-		new model.Handler();
-	}
+public abstract class TileObject {
+	
+	public abstract void tick();
+	public abstract BufferedImage getImage();
 	
 }

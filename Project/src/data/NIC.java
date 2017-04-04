@@ -10,9 +10,6 @@ package data;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
 import javax.imageio.ImageIO;
 
 /**
@@ -21,64 +18,14 @@ import javax.imageio.ImageIO;
  */
 public abstract class NIC {
 
-	//<editor-fold defaultstate="collapsed" desc="Information Lists">
-		/**
-		 * Main data for Pokemon.
-		 */
-		public static List<String> INFO_POKEMON;
-		/**
-		 * Main data for Items.
-		 */
-		public static List<String> INFO_ITEMS;
-		/**
-		 * Main data for Moves.
-		 */
-		public static List<String> INFO_MOVES;
-		/**
-		 * Main data for Types.
-		 */
-		public static List<String> INFO_TYPES;
-		/**
-		 * Main data for Maps.
-		 */
-		public static ArrayList<List<String>> INFO_MAPS;
-		/**
-		 * Main data for TMs.
-		 */
-		public static List<String> INFO_TM;
-		/**
-		 * Blank map data.
-		 */
-		public static List<String> INFO_BLANK_MAP;
-	//</editor-fold>
-	
-	//<editor-fold defaultstate="collapsed" desc="Static Attributes">
-		/**
-		 * Amount of Maps in X.
-		 */
-		public static int NUM_MAPS_X = 4;
-		/**
-		 * Amount of Maps in Y.
-		 */
-		public static int NUM_MAPS_Y = 4;
-	//</editor-fold>
+	private static BufferedImage tiles;
+	private static BufferedImage powerups;
+	private static BufferedImage bombs;
+	private static BufferedImage explosion;
+	private static BufferedImage[] playerSprites;
 
-	//<editor-fold defaultstate="collapsed" desc="Static Images">
-		public static BufferedImage pokemonIcons;
-		public static BufferedImage tileset;
-		public static BufferedImage gym;
-		public static BufferedImage center;
-		public static BufferedImage house;
-		public static BufferedImage objects;
-		public static BufferedImage shop;
-		public static BufferedImage house2;
-		public static BufferedImage house3;
-		public static BufferedImage wstone;
-		public static BufferedImage wstone2;
-		public static BufferedImage tree;
-		public static BufferedImage tree2;
-		public static BufferedImage[] objSets;
-	//</editor-fold>
+	public static int[][] mapTemplate;
+	public static int SIZE_MAP = 15;
 		
 	public static void loadAllData() {
 		
@@ -89,108 +36,74 @@ public abstract class NIC {
 		}
 		
 		try {
-			loadInfo();
+			loadMap();
 		} catch (IOException ex) {
 			
 		}
-		
-		loadMaps();
+	}
+	
+	private static void loadMap() throws IOException {
+		java.util.List<String> readInfoQ;
+
+		File archivo = new File("db/map.txt");
+		readInfoQ = java.nio.file.Files.readAllLines(archivo.toPath());
+		mapTemplate = new int[SIZE_MAP][SIZE_MAP];
+		for (int i = 0; i < readInfoQ.size(); i++) {
+			String[] columns = readInfoQ.get(i).split(",");
+			for (int j = 0; j < columns.length; j++) {
+				mapTemplate[i][j] = Integer.parseInt(columns[j]);
+			}
+		}
 	}
 	
 	private static void loadImages() throws IOException {
 		
-		pokemonIcons = ImageIO.read(new File("assets/pokemon/pokemonIconsSmall.png"));
+		tiles = ImageIO.read(new File("assets/tiles.png"));
+		powerups = ImageIO.read(new File("assets/powerups.png"));
+		bombs = ImageIO.read(new File("assets/bombsprite.png"));
+		explosion = ImageIO.read(new File("assets/explodesprite.png"));
 		
-		tileset = ImageIO.read(new File("assets/map/tileset.png"));
-
-		shop = ImageIO.read(new File("assets/map/shop.png"));
-
-		gym = ImageIO.read(new File("assets/map/gym.png"));
-
-		center = ImageIO.read(new File("assets/map/center.png"));
-
-		objects = ImageIO.read(new File("assets/map/objects.png"));
-
-		house = ImageIO.read(new File("assets/map/house.png"));
-
-		tree = ImageIO.read(new File("assets/map/tree.png"));
-
-		tree2 = ImageIO.read(new File("assets/map/tree2.png"));
-
-		house2 = ImageIO.read(new File("assets/map/house2.png"));
-
-		house3 = ImageIO.read(new File("assets/map/house3.png"));
-
-		wstone = ImageIO.read(new File("assets/map/wstone.png"));
-
-		wstone2 = ImageIO.read(new File("assets/map/wstone2.png"));
-
-		objSets = new BufferedImage[]{objects, house, house2, house3, center, shop, gym, tree, tree2, wstone, wstone2};
-		
+		int playerSpriteSheets = 8;
+		playerSprites = new BufferedImage[playerSpriteSheets];
+		for (int i = 0; i < playerSpriteSheets; i++) {
+			playerSprites[i] = ImageIO.read(new File("assets/player"+(i+1)+".png"));
+		}
 	}
 	
-	private static void loadInfo() throws IOException {
-
-		List<String> readInfoP = null;
-		List<String> readInfoI = null;
-		List<String> readInfoM = null;
-		List<String> readInfoT = null;
-		List<String> readInfoTM = null;
-
-		File archivo;
-
-		archivo = new File("db/listPokemon.txt");
-		readInfoP = Files.readAllLines(archivo.toPath());
-
-		archivo = new File("db/listItems.txt");
-		readInfoI = Files.readAllLines(archivo.toPath());
-
-		archivo = new File("db/listMoves.txt");
-		readInfoM = Files.readAllLines(archivo.toPath());
-
-		archivo = new File("db/listTypes.txt");
-		readInfoT = Files.readAllLines(archivo.toPath());
-
-		archivo = new File("db/listTM.txt");
-		readInfoTM = Files.readAllLines(archivo.toPath());
-
-		INFO_ITEMS = readInfoI;
-		INFO_POKEMON = readInfoP;
-		INFO_MOVES = readInfoM;
-		INFO_TYPES = readInfoT;
-		INFO_TM = readInfoTM;
-		
+	public static BufferedImage getBombFrame(int index) {
+		return bombs.getSubimage((index-1)*16, 0, 16, 16);
 	}
 	
-	private static void loadMaps() {
-
-		File archivo;
-		List<String> readInfoB = null;
-		ArrayList<List<String>> readMap = new ArrayList();
-		
-		try {
-			archivo = new File("db/mapBLANK.txt");
-			readInfoB = Files.readAllLines(archivo.toPath());
-		} catch (IOException ex) {
-			System.err.println("BLANK: Couldn't load files!");
-			System.exit(0);
+	public static BufferedImage getPowerupFrame(int powerIndex, int frameIndex) {
+		return powerups.getSubimage((powerIndex-1)*16, (frameIndex-1)*16, 16, 16);
+	}
+	
+	public static BufferedImage getTile(int index) {
+		return tiles.getSubimage((index-1)*16, 0, 16, 16);
+	}
+	
+	public static BufferedImage getExplosionFrame(int frameIndex, int type, int rotation, int random) {
+		int frameDisplace = (frameIndex-1)*4*16;
+		int frameY = type*16;
+		if (type == model.Boom.TYPE_CENTER) {
+			random = 1;
 		}
-
-		for (int y = 0; y < NUM_MAPS_Y; y++) {
-			for (int x = 0; x < NUM_MAPS_X; x++) {
-				List<String> temp = null;
-				try {
-					archivo = new File("db/mapX" + x + "Y" + y + ".txt");
-					temp = Files.readAllLines(archivo.toPath());
-				} catch (IOException ex1) {
-					temp = readInfoB;
-				}
-				readMap.add(temp);
-			}
+		int frameX = (random-1)*16;
+		// TODO missing rotation
+		return explosion.getSubimage(frameDisplace+frameX, frameY, 16, 16);
+	}
+	
+	public static BufferedImage getPlayerFrame(int playerColor, int anim, int frame) {
+		BufferedImage thisSheet = playerSprites[playerColor-1];
+		int x;
+		int y;
+		if (anim < 5) {
+			x = (frame-1)*16;
+			y = (anim-1)*25;
+		} else {
+			x = 48;
+			y = (frame-1)*25;
 		}
-		
-		INFO_MAPS = readMap;
-		INFO_BLANK_MAP = readInfoB;
-		
+		return thisSheet.getSubimage(x, y, 16, 25);
 	}
 }

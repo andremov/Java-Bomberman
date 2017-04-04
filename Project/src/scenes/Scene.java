@@ -39,7 +39,7 @@ public abstract class Scene {
 	protected abstract void start();
 
 	public void dispose() {
-		main.gameState.remove(main.gameState.size() - 1);
+		Handler.currentScene = null;
 	}
 
 	protected abstract void move(int dir);

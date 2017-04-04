@@ -16,23 +16,30 @@ import model.Handler;
 public class Window extends JFrame {
 
 	Display canvas;
+	Thread canvasThread;
 	
 	public Window(Handler h) {
 		setLayout(null);
-		setSize(h.SCREEN_SIZE,h.SCREEN_SIZE);
+		setSize(Handler.SCREEN_SIZE,Handler.SCREEN_SIZE);
 		setLocationRelativeTo(null);
-		setTitle("Adivinador");
+		setTitle("Bomberman");
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setResizable(false);
 		setUndecorated(true);
+		addKeyListener(new KeyHandler());
 		
-		addKeyListener(new KeyHandler(h));
 		
 		canvas = new Display(h);
-//		canvas.setSize(h.getCanvasSize(),h.getCanvasSize());
+		canvas.setSize(Handler.SCREEN_SIZE,Handler.SCREEN_SIZE);
 		add(canvas);
 		
+		canvasThread = new Thread(canvas);
+		
 		setVisible(true);
+	}
+	
+	public void startCanvas() {
+		canvasThread.start();
 	}
 	
 }

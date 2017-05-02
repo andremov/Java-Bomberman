@@ -78,7 +78,8 @@ public class KeyHandler extends KeyAdapter {
 //		} else if (key.getKeyCode() == KeyEvent.VK_ENTER) {
 //			acceptedKey = true;
 //			sendAction = ACTION_START;
-//		} else if (key.getKeyCode() == KeyEvent.VK_ESCAPE) {
+		} else if (key.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    Handler.getGame().start();
 //			acceptedKey = true;
 //			sendAction = ACTION_BACK;
 //			if (doExitCheck) {

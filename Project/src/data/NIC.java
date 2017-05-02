@@ -77,7 +77,7 @@ public abstract class NIC {
 	}
 	
 	public static BufferedImage getPowerupFrame(int powerIndex, int frameIndex) {
-		return powerups.getSubimage(powerIndex*16, (frameIndex-1)*16, 16, 16);
+		return powerups.getSubimage(powerIndex*16, frameIndex*16, 16, 16);
 	}
 	
 	public static BufferedImage getTile(int index) {

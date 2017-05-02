@@ -16,21 +16,9 @@ import view.Window;
  */
 public class Handler {
 
-	// <editor-fold defaultstate="collapsed" desc="Attributes">
-		/**
-		 * Window size in X dimension.
-		 */
-		public static final int SCREEN_SIZE = 600;
-		public static final int TILE_SIZE = 16;
-		/**
-		 * Current battle handler.
-		 */
-		//		public Combat currentBattle;
-		/**
-		 * List of states.
-		 */
-		public static Scene currentScene;
-	// </editor-fold>
+        public static final int SCREEN_SIZE = 600;
+        public static final int TILE_SIZE = 16;
+        public static Scene currentScene;
 	
 	public static Player[] players;
 	private Window gameWindow;
@@ -43,10 +31,10 @@ public class Handler {
 		for (int i = 0; i < players.length; i++) {
 			players[i] = new Player();
 		}
-		addPlayer(0,1);
-		addPlayer(1,2);
 		gameWindow = new Window(this);
 		gameWindow.startCanvas();
+		addPlayer(0,1);
+		addPlayer(1,2);
 		
 		currentScene = (new scenes.Game(this, true));
 	}
@@ -60,5 +48,13 @@ public class Handler {
 		players[index] = null;
 		players[index] = new Player();
 	}
+        
+        public static scenes.Game getGame() {
+            scenes.Game a = null;
+            if (currentScene instanceof scenes.Game) {
+                a = (scenes.Game)currentScene;
+            }
+            return a;
+        }
 	
 }

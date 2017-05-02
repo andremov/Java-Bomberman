@@ -16,7 +16,7 @@ import java.awt.image.BufferedImage;
  */
 public class Player {
 	
-	public static int COLLIDER_SIZE = 12;
+	public static int COLLIDER_SIZE = 9;
 	public static int DELTA = 4;
 	
 	public static final int DELTA_CENTER_X = 8;
@@ -29,7 +29,6 @@ public class Player {
 	public static int ANIM_DEAD = 4;
 	
 	private boolean enabled;
-	private int maxBombs;
 	private int firePower;
 	private boolean alive;
 	private int bombsLeft;
@@ -40,13 +39,15 @@ public class Player {
 	private int xDelta;
 	private int yDelta;
 	private boolean moving;
+        private boolean bombCollision;
 	
 	public Player() {
 		this.enabled = false;
 		this.alive = true;
 		this.moving = false;
+                this.bombCollision = true;
 		this.firePower = 2;
-		this.maxBombs = 1;
+//		this.maxBombs = 1;
 		this.bombsLeft = 1;
 		resetPlayer();
 	}
@@ -55,17 +56,15 @@ public class Player {
 		this.currentAnim = ANIM_MOVE_DOWN;
 		this.currentFrame = 2;
 	}
-
-	public BufferedImage getDisplay() {
-		BufferedImage image = new BufferedImage(16, 25, BufferedImage.TYPE_INT_ARGB);
-		Graphics g = image.getGraphics();
-		
+        
+        private void tick() {
 		float newX = this.coordinate.getxReal()+xDelta;
 		float newY = this.coordinate.getyReal()+yDelta;
-			
-		if (moving) {
-
-			if (!((scenes.Game)Handler.currentScene).collision(newX-(COLLIDER_SIZE/2), newY-(COLLIDER_SIZE/2))){
+                if (!this.bombCollision) {
+                    this.bombCollision = !Handler.getGame().collision(this.coordinate.getxReal()-(COLLIDER_SIZE/2), this.coordinate.getyReal()-(COLLIDER_SIZE/2));
+                }
+                if (moving) {
+			if (!Handler.getGame().collision(newX-(COLLIDER_SIZE/2), newY-(COLLIDER_SIZE/2),this.bombCollision)){
 				this.coordinate.setyReal(newY);
 				this.coordinate.setxReal(newX);
 			}
@@ -74,15 +73,39 @@ public class Player {
 				currentFrame = 1;
 			}
 		}
-		if (((scenes.Game)Handler.currentScene).burn(newX-(COLLIDER_SIZE/2), newY-(COLLIDER_SIZE/2))) {
+		if (Handler.getGame().burn(newX-(COLLIDER_SIZE/2), newY-(COLLIDER_SIZE/2))) {
 			this.alive = false;
 		}
+                int powerup = Handler.getGame().powerCheck(newX-(COLLIDER_SIZE/2), newY-(COLLIDER_SIZE/2));
+                if (powerup != 0) {
+			if (powerup == 1) {
+                            this.bombsLeft++;
+                        } else {
+                            this.firePower++;
+                        }
+		}
+        }
+
+	public BufferedImage getDisplay() {
+		BufferedImage image = new BufferedImage(16, 25, BufferedImage.TYPE_INT_ARGB);
+		Graphics g = image.getGraphics();
 		
+                tick();
+                
 		g.drawImage(data.NIC.getPlayerFrame(color,currentAnim,currentFrame), 0, 0, 16, 25, null);
 		
 		return image;
 	}
-	
+        
+        public boolean plantBomb() {
+            boolean canPlant = this.bombsLeft > 0;
+            if (canPlant) {
+                this.bombsLeft--;
+                this.bombCollision = false;
+            }
+            return canPlant;
+        }
+        
 	private void checkAnim() {
 		moving = true;
 		if (yDelta < 0) {
@@ -139,19 +162,6 @@ public class Player {
 	}
 	
 	//<editor-fold defaultstate="collapsed" desc="Getters & Setters">
-	/**
-	 * @return the maxBombs
-	 */
-	public int getMaxBombs() {
-		return maxBombs;
-	}
-
-	/**
-	 * @param maxBombs the maxBombs to set
-	 */
-	public void setMaxBombs(int maxBombs) {
-		this.maxBombs = maxBombs;
-	}
 
 	/**
 	 * @return the firePower

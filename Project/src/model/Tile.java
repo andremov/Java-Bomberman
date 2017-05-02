@@ -50,10 +50,28 @@ public class Tile {
 		this.delta = 1;
 	}
 	
+        public boolean isBomb() {
+                return this.object == OBJECT_BOMB;
+        }
+        
 	public boolean isSolid() {
 		return this.object == OBJECT_BLOCK || this.isBreakable();
 	}
 	
+        public int getPowerup() {
+            int p = 0;
+            if (this.object == OBJECT_POWERUP_BOMB) {
+                p = 1;
+            } else if (this.object == OBJECT_POWERUP_FIRE) {
+                p = 2;
+            }
+            return p;
+        }
+        
+        public boolean isCenterBoom() {
+            return this.object == OBJECT_BOOM;
+        }
+        
 	public boolean isBreakable() {
 		return this.object == OBJECT_WALL;
 	}
@@ -87,6 +105,10 @@ public class Tile {
 						this.delta = -1;
 					}
 					g.drawImage(NIC.getBombFrame(this.frame), 0, 0, Handler.TILE_SIZE, Handler.TILE_SIZE, null);
+                                } else if (this.object == OBJECT_POWERUP_BOMB) {
+                                        g.drawImage(NIC.getPowerupFrame(0,this.frame%2), 0, 0, Handler.TILE_SIZE, Handler.TILE_SIZE, null);
+                                } else if (this.object == OBJECT_POWERUP_FIRE) {
+                                        g.drawImage(NIC.getPowerupFrame(1,this.frame%2), 0, 0, Handler.TILE_SIZE, Handler.TILE_SIZE, null);
 				} else if (this.object >= OBJECT_BOOM) {
 					int type = this.object-OBJECT_BOOM;
 					if (this.frame == 1 && this.delta == -1) {
@@ -120,6 +142,17 @@ public class Tile {
 		
 		return image;
 	}
+        
+        public void destroy() {
+            int random = (int)(Math.ceil(Math.random()*10));
+            if (random <= 6) {
+                this.object = OBJECT_EMPTY;
+            } else if (random <= 8) {
+                this.object = OBJECT_POWERUP_BOMB;
+            } else if (random <= 10) {
+                this.object = OBJECT_POWERUP_FIRE;
+            }
+        }
 
 	/**
 	 * @param object the object to set

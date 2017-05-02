@@ -46,25 +46,54 @@ public class Game extends Scene {
 		}
 	}
 
+        public void start() {
+            this.globalTick = 0;
+            gameMap = new Map();
+            activeBombs.clear();
+		
+		for (int i = 0; i < Handler.players.length; i++) {
+			if (Handler.players[i].isEnabled()) {
+				int tileDiff = 12;
+				int x = 1 + (i%2)*tileDiff;
+				int y = 1 + ((int)Math.floor(i/2))*tileDiff;
+				Coordinate tileCd = new Coordinate(Coordinate.TYPE_TILE,x,y);
+				Handler.players[i].setAlive(true);
+                                Handler.players[i].setBombsLeft(1);
+                                Handler.players[i].setFirePower(2);
+				Handler.players[i].setCoordinate(tileCd);
+			}
+		}
+        }
+        
+	public boolean collision(float x, float y, boolean canCollide) {
+		return gameMap.collision(x,y,canCollide);
+	}
+
 	public boolean collision(float x, float y) {
-		return gameMap.collision(x,y);
+		return gameMap.openSpace(x,y);
 	}
 
 	public boolean burn(float x, float y) {
 		return gameMap.burn(x,y);
 	}
-	
+        
+	public int powerCheck(float x, float y) {
+		return gameMap.powerCheck(x,y);
+        }
+        
+        
 	@Override
 	public void receiveKeyAction(int actionCode) {
 		int player = (int)Math.floor(actionCode/16);
-		int	state = actionCode%2;
+		int state = actionCode%2;
 		int action = actionCode-(player*16)-state;
 		
 		if (action == KeyHandler.ACTION_A && state == KeyHandler.MOD_RELEASE) {
 			// BOMB
-			if (Handler.players[player].getBombsLeft()>0) {
+			if (Handler.players[player].plantBomb()) {
+                            
 				plantBomb(Handler.players[player]);
-				Handler.players[player].setBombsLeft(Handler.players[player].getBombsLeft()-1);
+//				Handler.players[player].setBombsLeft(Handler.players[player].getBombsLeft()-1);
 			}
 		} else {
 			//MOVEMENT
@@ -77,12 +106,12 @@ public class Game extends Scene {
 		gameMap.getTiles()[owner.getCoordinate().getxTile()][owner.getCoordinate().getyTile()].setObject(Tile.OBJECT_BOMB);
 	}
 	
-	private void explode() {
-		int startX = activeBombs.get(0).x;
-		int startY = activeBombs.get(0).y;
-		activeBombs.get(0).owner.setBombsLeft(activeBombs.get(0).owner.getBombsLeft()+1);
-		int max = activeBombs.get(0).firePower;
-		activeBombs.remove(0);
+	private void explode(int indice) {
+		int startX = activeBombs.get(indice).x;
+		int startY = activeBombs.get(indice).y;
+		activeBombs.get(indice).owner.setBombsLeft(activeBombs.get(indice).owner.getBombsLeft()+1);
+		int max = activeBombs.get(indice).firePower;
+		activeBombs.remove(indice);
 		
 		gameMap.getTiles()[startX][startY].setObject(Tile.OBJECT_BOOM+Tile.TYPE_CENTER);
 		
@@ -96,9 +125,15 @@ public class Game extends Scene {
 		if (fire > 0) {
 			if (gameMap.getTiles()[tileX+deltaX][tileY+deltaY].isSolid()) {
 				if (gameMap.getTiles()[tileX+deltaX][tileY+deltaY].isBreakable()) {
-					gameMap.getTiles()[tileX+deltaX][tileY+deltaY].setObject(Tile.OBJECT_EMPTY);
+					gameMap.getTiles()[tileX+deltaX][tileY+deltaY].destroy();
 				}
-			} else {
+			} else if (gameMap.getTiles()[tileX+deltaX][tileY+deltaY].isBomb()) {
+                                for (int i = 0; i < activeBombs.size(); i++) {
+                                    if (tileX+deltaX == activeBombs.get(i).x && tileY+deltaY == activeBombs.get(i).y){
+                                        explode(i);
+                                    }
+                                }
+			} else if (!gameMap.getTiles()[tileX+deltaX][tileY+deltaY].isCenterBoom()){
 				int type = Tile.OBJECT_BOOM;
 				if (deltaY > 0) {
 					type = type + Tile.TYPE_ROTATE;
@@ -128,7 +163,7 @@ public class Game extends Scene {
 		this.globalTick++;
 //		boolean doCycle = !
 		while (!activeBombs.isEmpty() && activeBombs.get(0).explodeTick <= globalTick) {
-			explode();
+			explode(0);
 		}
 		
 		g.drawImage(gameMap.getDisplay(), 0, 0, mapSize, mapSize, null);

@@ -20,12 +20,12 @@ public class Window extends JFrame {
 	
 	public Window(Handler h) {
 		setLayout(null);
-		setSize(Handler.SCREEN_SIZE,Handler.SCREEN_SIZE);
+		setSize(Handler.SCREEN_SIZE+6,Handler.SCREEN_SIZE+29);
 		setLocationRelativeTo(null);
 		setTitle("Bomberman");
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setResizable(false);
-		setUndecorated(true);
+//		setUndecorated(true);
 		addKeyListener(new KeyHandler());
 		
 		

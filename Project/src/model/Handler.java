@@ -20,8 +20,8 @@ public class Handler {
 		/**
 		 * Window size in X dimension.
 		 */
-		public static int SCREEN_SIZE;
-		public static int TILE_SIZE = 16;
+		public static final int SCREEN_SIZE = 600;
+		public static final int TILE_SIZE = 16;
 		/**
 		 * Current battle handler.
 		 */
@@ -33,53 +33,32 @@ public class Handler {
 	// </editor-fold>
 	
 	public static Player[] players;
-	public static int numPlayers;
 	private Window gameWindow;
 	
 	/**
 	 * Build game.
-	 * @float resize Resize factor of window.
 	 */
 	public Handler() {
-		SCREEN_SIZE = 600;
-		numPlayers = 1;
 		players = new Player[4];
-		players[0] = new Player(1);
+		for (int i = 0; i < players.length; i++) {
+			players[i] = new Player();
+		}
+		addPlayer(0,1);
+		addPlayer(1,2);
 		gameWindow = new Window(this);
 		gameWindow.startCanvas();
 		
 		currentScene = (new scenes.Game(this, true));
 	}
 	
-	/*
-	public void canContinue() {
-		gw.setVisible(true);
-		gw.startCanvasThread();
+	private void addPlayer(int index, int color) {
+		players[index].setColor(color);
+		players[index].setEnabled(true);
 	}
 	
-	public void clearStates(String limit) {
-		boolean pullOut = true;
-		while (pullOut && currentScene.get(currentScene.size() - 1).getName().compareTo(limit) != 0) {
-			currentScene.get(currentScene.size() - 1).dispose();
-			pullOut = !currentScene.isEmpty();
-		}
+	private void removePlayer(int index) {
+		players[index] = null;
+		players[index] = new Player();
 	}
-	
-	public pokemonviolet.model.Player getPlayer() {
-		pokemonviolet.model.Player player = null;
-		boolean found = false;
-		int counter = 0;
-		while (!found && counter < currentScene.size()) {
-			if (currentScene.get(counter).getName().compareTo("GAME") == 0) {
-				player = ((pokemonviolet.scenes.Game) currentScene.get(counter)).getPlayer();
-				found = true;
-			} else {
-				counter = counter + 1;
-			}
-		}
-		
-		return player;
-	}
-	*/
 	
 }

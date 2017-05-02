@@ -9,8 +9,12 @@ import control.KeyHandler;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
+import model.Coordinate;
 import model.Handler;
 import model.Map;
+import model.Player;
+import model.Tile;
 
 /**
  *
@@ -18,42 +22,101 @@ import model.Map;
  */
 public class Game extends Scene {
 
+	private static int BOMB_TIMER = 50;
+	
+	private ArrayList<Bomb> activeBombs;
+	private double globalTick;
 	Map gameMap;
 	
 	public Game(Handler main, boolean full) {
 		super(main, "Game", full);
-		
+		this.globalTick = 0;
+		activeBombs = new ArrayList<>();
 		gameMap = new Map();
-		for (int i = 0; i < Handler.numPlayers; i++) {
-			Handler.players[i].setXY(20,20);
+		
+		for (int i = 0; i < Handler.players.length; i++) {
+			if (Handler.players[i].isEnabled()) {
+				int tileDiff = 12;
+				int x = 1 + (i%2)*tileDiff;
+				int y = 1 + ((int)Math.floor(i/2))*tileDiff;
+				Coordinate tileCd = new Coordinate(Coordinate.TYPE_TILE,x,y);
+				
+				Handler.players[i].setCoordinate(tileCd);
+			}
 		}
 	}
 
+	public boolean collision(float x, float y) {
+		return gameMap.collision(x,y);
+	}
+
+	public boolean burn(float x, float y) {
+		return gameMap.burn(x,y);
+	}
+	
 	@Override
-	public void receiveKeyAction(int action, int state) {
-		if (action == KeyHandler.ACTION_A) {
-			accept();
+	public void receiveKeyAction(int actionCode) {
+		int player = (int)Math.floor(actionCode/16);
+		int	state = actionCode%2;
+		int action = actionCode-(player*16)-state;
+		
+		if (action == KeyHandler.ACTION_A && state == KeyHandler.MOD_RELEASE) {
+			// BOMB
+			if (Handler.players[player].getBombsLeft()>0) {
+				plantBomb(Handler.players[player]);
+				Handler.players[player].setBombsLeft(Handler.players[player].getBombsLeft()-1);
+			}
+		} else {
+			//MOVEMENT
+			Handler.players[player].move(action+state);
 		}
 	}
 
-	@Override
-	protected void accept() {
-//		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	private void plantBomb(Player owner){
+		activeBombs.add(new Bomb(owner, (int)(this.globalTick+BOMB_TIMER)));
+		gameMap.getTiles()[owner.getCoordinate().getxTile()][owner.getCoordinate().getyTile()].setObject(Tile.OBJECT_BOMB);
 	}
-
-	@Override
-	protected void cancel() {
-//		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	
+	private void explode() {
+		int startX = activeBombs.get(0).x;
+		int startY = activeBombs.get(0).y;
+		activeBombs.get(0).owner.setBombsLeft(activeBombs.get(0).owner.getBombsLeft()+1);
+		int max = activeBombs.get(0).firePower;
+		activeBombs.remove(0);
+		
+		gameMap.getTiles()[startX][startY].setObject(Tile.OBJECT_BOOM+Tile.TYPE_CENTER);
+		
+		flare(max,startX,startY,1,0);
+		flare(max,startX,startY,-1,0);
+		flare(max,startX,startY,0,1);
+		flare(max,startX,startY,0,-1);
 	}
+	
+	private void flare(int fire, int tileX, int tileY, int deltaX, int deltaY) {
+		if (fire > 0) {
+			if (gameMap.getTiles()[tileX+deltaX][tileY+deltaY].isSolid()) {
+				if (gameMap.getTiles()[tileX+deltaX][tileY+deltaY].isBreakable()) {
+					gameMap.getTiles()[tileX+deltaX][tileY+deltaY].setObject(Tile.OBJECT_EMPTY);
+				}
+			} else {
+				int type = Tile.OBJECT_BOOM;
+				if (deltaY > 0) {
+					type = type + Tile.TYPE_ROTATE;
+				} else if (deltaY < 0) {
+					type = type + (Tile.TYPE_ROTATE*3);
+				} else if (deltaX < 0) {
+					type = type + (Tile.TYPE_ROTATE*2);
+				}
+				if (fire == 1) {
+					type = type + Tile.TYPE_TIP;
+				} else {
+					type = type + Tile.TYPE_LONG;
+				}
 
-	@Override
-	protected void start() {
-//		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
-
-	@Override
-	protected void move(int dir) {
-//		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+				gameMap.getTiles()[tileX+deltaX][tileY+deltaY].setObject(type);
+				flare(fire-1,tileX+deltaX,tileY+deltaY,deltaX,deltaY);
+			}
+		}
 	}
 
 	@Override
@@ -62,13 +125,39 @@ public class Game extends Scene {
 		BufferedImage image = new BufferedImage(mapSize, mapSize, BufferedImage.TYPE_INT_ARGB);
 		Graphics g = image.getGraphics();
 		
+		this.globalTick++;
+//		boolean doCycle = !
+		while (!activeBombs.isEmpty() && activeBombs.get(0).explodeTick <= globalTick) {
+			explode();
+		}
+		
 		g.drawImage(gameMap.getDisplay(), 0, 0, mapSize, mapSize, null);
 		
-		for (int i = 0; i < Handler.numPlayers; i++) {
-			g.drawImage(Handler.players[i].getDisplay(),Handler.players[i].getX(),Handler.players[i].getY(),null);
+		for (int i = 0; i < Handler.players.length; i++) {
+			if (Handler.players[i].isEnabled() && Handler.players[i].isAlive()) {
+				Coordinate playerCoordinates = Handler.players[i].getCoordinate();
+				int displayX = (int)playerCoordinates.getxReal()-Player.DELTA_CENTER_X;
+				int displayY = (int)playerCoordinates.getyReal()-Player.DELTA_CENTER_Y;
+				g.drawImage(Handler.players[i].getDisplay(),displayX,displayY,null);
+			}
 		}
 		
 		return image;
 	}
 	
+	private class Bomb {
+		int firePower;
+		int explodeTick;
+		int x;
+		int y;
+		Player owner;
+		
+		public Bomb(Player owner, int explodeTick) {
+			this.firePower = owner.getFirePower();
+			this.explodeTick = explodeTick;
+			this.x = owner.getCoordinate().getxTile();
+			this.y = owner.getCoordinate().getyTile();
+			this.owner = owner;
+		}
+	}
 }

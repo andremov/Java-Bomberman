@@ -63,30 +63,35 @@ public abstract class NIC {
 		bombs = ImageIO.read(new File("assets/bombsprite.png"));
 		explosion = ImageIO.read(new File("assets/explodesprite.png"));
 		
-		int playerSpriteSheets = 8;
+		int playerSpriteSheets = 5;
 		playerSprites = new BufferedImage[playerSpriteSheets];
 		for (int i = 0; i < playerSpriteSheets; i++) {
 			playerSprites[i] = ImageIO.read(new File("assets/player"+(i+1)+".png"));
 		}
+		
+		
 	}
 	
 	public static BufferedImage getBombFrame(int index) {
-		return bombs.getSubimage((index-1)*16, 0, 16, 16);
+		return bombs.getSubimage(index*16, 0, 16, 16);
 	}
 	
 	public static BufferedImage getPowerupFrame(int powerIndex, int frameIndex) {
-		return powerups.getSubimage((powerIndex-1)*16, (frameIndex-1)*16, 16, 16);
+		return powerups.getSubimage(powerIndex*16, (frameIndex-1)*16, 16, 16);
 	}
 	
 	public static BufferedImage getTile(int index) {
-		return tiles.getSubimage((index-1)*16, 0, 16, 16);
+		return tiles.getSubimage(index*16, 0, 16, 16);
 	}
 	
-	public static BufferedImage getExplosionFrame(int frameIndex, int type, int rotation, int random) {
-		int frameDisplace = (frameIndex-1)*4*16;
+	public static BufferedImage getExplosionFrame(int frameIndex, int type) {
+		int random;
+		int frameDisplace = frameIndex*4*16;
 		int frameY = type*16;
-		if (type == model.Boom.TYPE_CENTER) {
+		if (type == model.Tile.TYPE_CENTER) {
 			random = 1;
+		} else {
+			random = (int)(Math.ceil(Math.random()*4));
 		}
 		int frameX = (random-1)*16;
 		// TODO missing rotation
@@ -94,7 +99,8 @@ public abstract class NIC {
 	}
 	
 	public static BufferedImage getPlayerFrame(int playerColor, int anim, int frame) {
-		BufferedImage thisSheet = playerSprites[playerColor-1];
+		BufferedImage thisSheet;
+		thisSheet = playerSprites[playerColor-1];
 		int x;
 		int y;
 		if (anim < 5) {

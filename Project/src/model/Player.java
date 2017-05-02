@@ -5,6 +5,8 @@
  */
 package model;
 
+import control.KeyHandler;
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
@@ -14,27 +16,35 @@ import java.awt.image.BufferedImage;
  */
 public class Player {
 	
+	public static int COLLIDER_SIZE = 12;
+	public static int DELTA = 4;
+	
+	public static final int DELTA_CENTER_X = 8;
+	public static final int DELTA_CENTER_Y = 19;
+			
 	public static int ANIM_MOVE_DOWN = 1;
 	public static int ANIM_MOVE_LEFT = 2;
 	public static int ANIM_MOVE_RIGHT = 3;
 	public static int ANIM_MOVE_UP = 4;
 	public static int ANIM_DEAD = 4;
 	
+	private boolean enabled;
 	private int maxBombs;
 	private int firePower;
 	private boolean alive;
 	private int bombsLeft;
-	private int x;
-	private int y;
-	private int tileX;
-	private int tileY;
+	private Coordinate coordinate;
 	private int color;
 	private int currentFrame;
 	private int currentAnim;
+	private int xDelta;
+	private int yDelta;
+	private boolean moving;
 	
-	public Player(int color) {
-		this.color = color;
+	public Player() {
+		this.enabled = false;
 		this.alive = true;
+		this.moving = false;
 		this.firePower = 2;
 		this.maxBombs = 1;
 		this.bombsLeft = 1;
@@ -45,22 +55,90 @@ public class Player {
 		this.currentAnim = ANIM_MOVE_DOWN;
 		this.currentFrame = 2;
 	}
-	
-	public void setXY(int x, int y) {
-		this.setX(x);
-		this.setY(y);
-	}
 
 	public BufferedImage getDisplay() {
 		BufferedImage image = new BufferedImage(16, 25, BufferedImage.TYPE_INT_ARGB);
 		Graphics g = image.getGraphics();
 		
-		g.drawImage(data.NIC.getPlayerFrame(color,currentAnim,currentFrame), 0, 0, 16,25, null);
+		float newX = this.coordinate.getxReal()+xDelta;
+		float newY = this.coordinate.getyReal()+yDelta;
+			
+		if (moving) {
+
+			if (!((scenes.Game)Handler.currentScene).collision(newX-(COLLIDER_SIZE/2), newY-(COLLIDER_SIZE/2))){
+				this.coordinate.setyReal(newY);
+				this.coordinate.setxReal(newX);
+			}
+			currentFrame++;
+			if (currentFrame > 3) {
+				currentFrame = 1;
+			}
+		}
+		if (((scenes.Game)Handler.currentScene).burn(newX-(COLLIDER_SIZE/2), newY-(COLLIDER_SIZE/2))) {
+			this.alive = false;
+		}
 		
+		g.drawImage(data.NIC.getPlayerFrame(color,currentAnim,currentFrame), 0, 0, 16, 25, null);
 		
 		return image;
 	}
 	
+	private void checkAnim() {
+		moving = true;
+		if (yDelta < 0) {
+			// UP
+			currentAnim = ANIM_MOVE_UP;
+		} else if (yDelta > 0) {
+			// DOWN
+			currentAnim = ANIM_MOVE_DOWN;
+		} else if (xDelta < 0) {
+			// LEFT
+			currentAnim = ANIM_MOVE_LEFT;
+		} else if (xDelta > 0) {
+			// RIGHT
+			currentAnim = ANIM_MOVE_RIGHT;
+		} else {
+			// NONE
+			moving = false;
+			currentFrame = 2;
+		}
+	}
+	
+	public void move(int actionCode) {
+		int stateCode = actionCode%2;
+		int directionCode = actionCode - stateCode;
+		if (stateCode == KeyHandler.MOD_PRESS) {
+			if (directionCode == KeyHandler.ACTION_DOWN) {
+				yDelta = DELTA;
+				checkAnim();
+			} else if (directionCode == KeyHandler.ACTION_LEFT) {
+				xDelta = -DELTA;
+				checkAnim();
+			} else if (directionCode == KeyHandler.ACTION_RIGHT) {
+				xDelta = DELTA;
+				checkAnim();
+			} else if (directionCode == KeyHandler.ACTION_UP) {
+				yDelta = -DELTA;
+				checkAnim();
+			}
+		} else {
+			if (directionCode == KeyHandler.ACTION_DOWN && yDelta == DELTA) {
+				yDelta = 0;
+				checkAnim();
+			} else if (directionCode == KeyHandler.ACTION_LEFT && xDelta == -DELTA) {
+				xDelta = 0;
+				checkAnim();
+			} else if (directionCode == KeyHandler.ACTION_RIGHT && xDelta == DELTA) {
+				xDelta = 0;
+				checkAnim();
+			} else if (directionCode == KeyHandler.ACTION_UP && yDelta == -DELTA) {
+				yDelta = 0;
+				checkAnim();
+			}
+		}
+	}
+	
+	//<editor-fold defaultstate="collapsed" desc="Getters & Setters">
 	/**
 	 * @return the maxBombs
 	 */
@@ -118,34 +196,6 @@ public class Player {
 	}
 
 	/**
-	 * @return the x
-	 */
-	public int getX() {
-		return x;
-	}
-
-	/**
-	 * @param x the x to set
-	 */
-	public void setX(int x) {
-		this.x = x;
-	}
-
-	/**
-	 * @return the y
-	 */
-	public int getY() {
-		return y;
-	}
-
-	/**
-	 * @param y the y to set
-	 */
-	public void setY(int y) {
-		this.y = y;
-	}
-
-	/**
 	 * @return the color
 	 */
 	public int getColor() {
@@ -160,31 +210,31 @@ public class Player {
 	}
 
 	/**
-	 * @return the tileX
+	 * @return the coordinate
 	 */
-	public int getTileX() {
-		return tileX;
+	public Coordinate getCoordinate() {
+		return coordinate;
 	}
 
 	/**
-	 * @param tileX the tileX to set
+	 * @return the enabled
 	 */
-	public void setTileX(int tileX) {
-		this.tileX = tileX;
+	public boolean isEnabled() {
+		return enabled;
 	}
 
 	/**
-	 * @return the tileY
+	 * @param enabled the enabled to set
 	 */
-	public int getTileY() {
-		return tileY;
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
 	}
 
 	/**
-	 * @param tileY the tileY to set
+	 * @param coordinate the coordinate to set
 	 */
-	public void setTileY(int tileY) {
-		this.tileY = tileY;
+	public void setCoordinate(Coordinate coordinate) {
+		this.coordinate = coordinate;
 	}
-	
+	//</editor-fold>
 }

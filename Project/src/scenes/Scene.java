@@ -30,19 +30,11 @@ public abstract class Scene {
 		this.full = full;
 	}
 
-	public abstract void receiveKeyAction(int action, int state);
-
-	protected abstract void accept();
-
-	protected abstract void cancel();
-
-	protected abstract void start();
+	public abstract void receiveKeyAction(int actionCode);
 
 	public void dispose() {
 		Handler.currentScene = null;
 	}
-
-	protected abstract void move(int dir);
 
 	public abstract BufferedImage getDisplay() throws IOException;
 

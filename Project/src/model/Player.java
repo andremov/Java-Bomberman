@@ -16,7 +16,7 @@ import java.awt.image.BufferedImage;
  */
 public class Player {
 	
-	public static int COLLIDER_SIZE = 9;
+	public static int COLLIDER_SIZE = 12;
 	public static int DELTA = 4;
 	
 	public static final int DELTA_CENTER_X = 8;
@@ -39,15 +39,14 @@ public class Player {
 	private int xDelta;
 	private int yDelta;
 	private boolean moving;
-        private boolean bombCollision;
+	private boolean bombCollision;
 	
 	public Player() {
 		this.enabled = false;
 		this.alive = true;
 		this.moving = false;
-                this.bombCollision = true;
+		this.bombCollision = true;
 		this.firePower = 2;
-//		this.maxBombs = 1;
 		this.bombsLeft = 1;
 		resetPlayer();
 	}
@@ -57,54 +56,70 @@ public class Player {
 		this.currentFrame = 2;
 	}
         
-        private void tick() {
-		float newX = this.coordinate.getxReal()+xDelta;
-		float newY = this.coordinate.getyReal()+yDelta;
-                if (!this.bombCollision) {
-                    this.bombCollision = !Handler.getGame().collision(this.coordinate.getxReal()-(COLLIDER_SIZE/2), this.coordinate.getyReal()-(COLLIDER_SIZE/2));
-                }
-                if (moving) {
-			if (!Handler.getGame().collision(newX-(COLLIDER_SIZE/2), newY-(COLLIDER_SIZE/2),this.bombCollision)){
-				this.coordinate.setyReal(newY);
-				this.coordinate.setxReal(newX);
-			}
+	private void tick() {
+		float physicsX = this.coordinate.getxReal()-(COLLIDER_SIZE/2);
+		float physicsY = this.coordinate.getyReal()-(COLLIDER_SIZE/2);
+		float newX = this.coordinate.getxReal();
+		float newY = this.coordinate.getyReal();
+		if (xDelta != 0) {
+			newX = newX+xDelta+((xDelta/Math.abs(xDelta))*(COLLIDER_SIZE/2));
+		}
+		if (xDelta != 0) {
+			newY = newY+yDelta+((yDelta/Math.abs(yDelta))*(COLLIDER_SIZE/2));
+		}
+		if (!this.bombCollision) {
+			this.bombCollision = !Handler.getGame().openSpace(physicsX, physicsY);
+		}
+		if (moving) {
 			currentFrame++;
 			if (currentFrame > 3) {
 				currentFrame = 1;
 			}
+			Coordinate cd = new Coordinate(Coordinate.TYPE_REAL, newX, newY);
+			if (cd.getxTile() != this.coordinate.getxTile() || cd.getyTile() != this.coordinate.getyTile()) {
+				if (!Handler.getGame().collision(physicsX+xDelta,physicsY,this.bombCollision)){
+					this.coordinate.setxReal(physicsX+xDelta);
+				}
+				if (!Handler.getGame().collision(physicsX,physicsY+yDelta,this.bombCollision)){
+					this.coordinate.setyReal(physicsY+yDelta);
+				}
+				int powerup = Handler.getGame().powerCheck(physicsX,physicsY);
+				if (powerup != 0) {
+					if (powerup == 1) {
+						this.bombsLeft++;
+					} else {
+						this.firePower++;
+					}
+				}
+			} else {
+				this.coordinate.setyReal(physicsY+yDelta);
+				this.coordinate.setxReal(physicsX+xDelta);
+			}
 		}
-		if (Handler.getGame().burn(newX-(COLLIDER_SIZE/2), newY-(COLLIDER_SIZE/2))) {
+		if (Handler.getGame().burn(physicsX,physicsY)) {
 			this.alive = false;
 		}
-                int powerup = Handler.getGame().powerCheck(newX-(COLLIDER_SIZE/2), newY-(COLLIDER_SIZE/2));
-                if (powerup != 0) {
-			if (powerup == 1) {
-                            this.bombsLeft++;
-                        } else {
-                            this.firePower++;
-                        }
-		}
-        }
+	}
 
 	public BufferedImage getDisplay() {
 		BufferedImage image = new BufferedImage(16, 25, BufferedImage.TYPE_INT_ARGB);
 		Graphics g = image.getGraphics();
 		
-                tick();
+		tick();
                 
 		g.drawImage(data.NIC.getPlayerFrame(color,currentAnim,currentFrame), 0, 0, 16, 25, null);
 		
 		return image;
 	}
         
-        public boolean plantBomb() {
-            boolean canPlant = this.bombsLeft > 0;
-            if (canPlant) {
-                this.bombsLeft--;
-                this.bombCollision = false;
-            }
-            return canPlant;
-        }
+	public boolean plantBomb() {
+		boolean canPlant = this.bombsLeft > 0;
+		if (canPlant) {
+			this.bombsLeft--;
+			this.bombCollision = false;
+		}
+		return canPlant;
+	}
         
 	private void checkAnim() {
 		moving = true;

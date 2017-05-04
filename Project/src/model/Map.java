@@ -50,63 +50,45 @@ public class Map {
 		boolean collided = false;
 		
 		Coordinate cd = new Coordinate(Coordinate.TYPE_REAL, x, y);
-                int i = cd.getxTile();
-                int j = cd.getyTile();
-                if (tiles[i][j].isBoom()) {
-                    collided = true;
-                }
+		int i = cd.getxTile();
+		int j = cd.getyTile();
+		if (tiles[i][j].isBoom()) {
+			collided = true;
+		}
 		return collided;
 	}
 	
 	public boolean collision(float x, float y, boolean canCollide) {
-		// 0 -> no collision
-		// 1 -> X collsion
-		// 2 -> Y collision
-		// 3 -> both
-		
-//		int x = (int)check.getxTile();
-//		int y = (int)check.getyTile();
-
 		boolean collided = false;
 		
 		Coordinate cd = new Coordinate(Coordinate.TYPE_REAL, x, y);
 		for (int i = cd.getxTile()-1; i <= cd.getxTile()+1; i++) {
 			for (int j = cd.getyTile()-1; j <= cd.getyTile()+1; j++) {
-				try {
-//					if (i > 0 && j > 0 && i < tiles.length && j < tiles.length) {
-//					if (i != cd.getxTile() && j != cd.getyTile()) {
-						if (tiles[i][j].isSolid()) {
-							boolean minorX = i*Handler.TILE_SIZE < x && x < (i+1)*Handler.TILE_SIZE;
-							boolean majorX = i*Handler.TILE_SIZE < x+Player.COLLIDER_SIZE && x+Player.COLLIDER_SIZE < (i+1)*Handler.TILE_SIZE;
+				if (tiles[i][j].isSolid()) {
+					boolean minorX = i*Handler.TILE_SIZE < x && x < (i+1)*Handler.TILE_SIZE;
+					boolean majorX = i*Handler.TILE_SIZE < x+Player.COLLIDER_SIZE && x+Player.COLLIDER_SIZE < (i+1)*Handler.TILE_SIZE;
 
-							boolean minorY = j*Handler.TILE_SIZE < y && y < (j+1)*Handler.TILE_SIZE;
-							boolean majorY = j*Handler.TILE_SIZE < y+Player.COLLIDER_SIZE && y+Player.COLLIDER_SIZE < (j+1)*Handler.TILE_SIZE;
+					boolean minorY = j*Handler.TILE_SIZE < y && y < (j+1)*Handler.TILE_SIZE;
+					boolean majorY = j*Handler.TILE_SIZE < y+Player.COLLIDER_SIZE && y+Player.COLLIDER_SIZE < (j+1)*Handler.TILE_SIZE;
 
-							if ((minorX || majorX) && (minorY || majorY)) {
-//								System.out.println("Colliding with tile ("+i+", "+j+")");
-								collided = true;
-							}
-							if ((minorX && majorX) && (minorY && majorY)) {
-								System.out.println("Preventing collision");
-								collided = false;
-							}
-						} else if (tiles[i][j].isBomb()) {
-                                                    if (canCollide) {
-							boolean minorX = i*Handler.TILE_SIZE < x && x < (i+1)*Handler.TILE_SIZE;
-							boolean majorX = i*Handler.TILE_SIZE < x+Player.COLLIDER_SIZE && x+Player.COLLIDER_SIZE < (i+1)*Handler.TILE_SIZE;
+					if ((minorX || majorX) && (minorY || majorY)) {
 
-							boolean minorY = j*Handler.TILE_SIZE < y && y < (j+1)*Handler.TILE_SIZE;
-							boolean majorY = j*Handler.TILE_SIZE < y+Player.COLLIDER_SIZE && y+Player.COLLIDER_SIZE < (j+1)*Handler.TILE_SIZE;
+						collided = true;
+					}
+					if ((minorX && majorX) && (minorY && majorY)) {
+						System.out.println("Preventing collision");
+						collided = false;
+					}
+				} else if (tiles[i][j].isBomb() && canCollide) {
+					boolean minorX = i*Handler.TILE_SIZE < x && x < (i+1)*Handler.TILE_SIZE;
+					boolean majorX = i*Handler.TILE_SIZE < x+Player.COLLIDER_SIZE && x+Player.COLLIDER_SIZE < (i+1)*Handler.TILE_SIZE;
 
-							if ((minorX || majorX) && (minorY || majorY)) {
-//								System.out.println("Colliding with tile ("+i+", "+j+")");
-								collided = true;
-							}
-                                                    }
-                                                }
-//					}
-				} catch(Exception e) {
-					// doesnt exist
+					boolean minorY = j*Handler.TILE_SIZE < y && y < (j+1)*Handler.TILE_SIZE;
+					boolean majorY = j*Handler.TILE_SIZE < y+Player.COLLIDER_SIZE && y+Player.COLLIDER_SIZE < (j+1)*Handler.TILE_SIZE;
+
+					if ((minorX || majorX) && (minorY || majorY)) {
+						collided = true;
+					}
 				}
 			}
 		}

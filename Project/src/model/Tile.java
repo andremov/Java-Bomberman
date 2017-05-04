@@ -33,8 +33,6 @@ public class Tile {
 	// TYPE_LONG + ROTATED 270 = 7
 	// TYPE_TIP + ROTATED 270 = 8
 	public static final int TYPE_ROTATE = 2;
-//	public static final int TYPE_ROTATE_180 = 4;
-//	public static final int TYPE_ROTATE_270 = 6;
 	
 	public static int BOMB_MAX_SPRITE = 3;
 	public static int BOOM_MAX_SPRITE = 5;

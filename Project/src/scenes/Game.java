@@ -46,11 +46,11 @@ public class Game extends Scene {
 		}
 	}
 
-        public void start() {
-            this.globalTick = 0;
-            gameMap = new Map();
-            activeBombs.clear();
-		
+	public void start() {
+		this.globalTick = 0;
+		gameMap = new Map();
+		activeBombs.clear();
+
 		for (int i = 0; i < Handler.players.length; i++) {
 			if (Handler.players[i].isEnabled()) {
 				int tileDiff = 12;
@@ -63,13 +63,13 @@ public class Game extends Scene {
 				Handler.players[i].setCoordinate(tileCd);
 			}
 		}
-        }
+	}
         
 	public boolean collision(float x, float y, boolean canCollide) {
 		return gameMap.collision(x,y,canCollide);
 	}
 
-	public boolean collision(float x, float y) {
+	public boolean openSpace(float x, float y) {
 		return gameMap.openSpace(x,y);
 	}
 

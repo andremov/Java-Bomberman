@@ -15,6 +15,7 @@ public class Bomberman {
 	 * @param args the command line arguments
 	 */
 	public static void main(String[] args) {
+//		new Socket()
 		data.NIC.loadAllData();
 		new model.Handler();
 	}

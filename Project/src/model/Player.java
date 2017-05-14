@@ -6,7 +6,6 @@
 package model;
 
 import control.KeyHandler;
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
@@ -16,11 +15,11 @@ import java.awt.image.BufferedImage;
  */
 public class Player {
 	
-	public static int COLLIDER_SIZE = 12;
-	public static int DELTA = 4;
+	private static final int COLLIDER_SIZE = 6;
+	private static final int MOVE_PX = 3;
 	
-	public static final int DELTA_CENTER_X = 8;
-	public static final int DELTA_CENTER_Y = 19;
+	private static final int DELTA_CENTER_X = 8;
+	private static final int DELTA_CENTER_Y = 19;
 			
 	public static int ANIM_MOVE_DOWN = 1;
 	public static int ANIM_MOVE_LEFT = 2;
@@ -39,66 +38,163 @@ public class Player {
 	private int xDelta;
 	private int yDelta;
 	private boolean moving;
-	private boolean bombCollision;
+	private boolean firstX;
+	private Coordinate cantCollideWith;
 	
 	public Player() {
 		this.enabled = false;
-		this.alive = true;
-		this.moving = false;
-		this.bombCollision = true;
-		this.firePower = 2;
-		this.bombsLeft = 1;
-		resetPlayer();
+		this.cantCollideWith = null;
 	}
 	
-	public void resetPlayer() {
-		this.currentAnim = ANIM_MOVE_DOWN;
-		this.currentFrame = 2;
+	public void init(Coordinate cd) {
+		this.firePower = 2;
+		this.bombsLeft = 1;
+		this.alive = true;
+		this.coordinate = cd;
+		this.firstX = false;
+		this.moving = false;
+		defaultAnimation();
 	}
-        
+	
 	private void tick() {
-		float physicsX = this.coordinate.getxReal()-(COLLIDER_SIZE/2);
-		float physicsY = this.coordinate.getyReal()-(COLLIDER_SIZE/2);
-		float newX = this.coordinate.getxReal();
-		float newY = this.coordinate.getyReal();
-		if (xDelta != 0) {
-			newX = newX+xDelta+((xDelta/Math.abs(xDelta))*(COLLIDER_SIZE/2));
+		boolean[] collisions = new boolean[6];
+		for (int i = 0; i < collisions.length; i++) {
+			collisions[i] = false;
 		}
-		if (xDelta != 0) {
-			newY = newY+yDelta+((yDelta/Math.abs(yDelta))*(COLLIDER_SIZE/2));
+
+		// CHECK IF BURNING
+		boolean killPlayer = false;
+		for (int x = getCollisionMinTileX(); x <= getCollisionMaxTileX(); x++) {
+			for (int y = getCollisionMinTileY(); y <= getCollisionMaxTileY(); y++) {
+				killPlayer = killPlayer || !Handler.getGame().burnTileCheck(x, y);
+			}
 		}
-		if (!this.bombCollision) {
-			this.bombCollision = !Handler.getGame().openSpace(physicsX, physicsY);
-		}
+		this.alive = killPlayer;
+
 		if (moving) {
+			// NOT MOVING
+			
+			//DO ANIMATION
 			currentFrame++;
 			if (currentFrame > 3) {
 				currentFrame = 1;
 			}
-			Coordinate cd = new Coordinate(Coordinate.TYPE_REAL, newX, newY);
-			if (cd.getxTile() != this.coordinate.getxTile() || cd.getyTile() != this.coordinate.getyTile()) {
-				if (!Handler.getGame().collision(physicsX+xDelta,physicsY,this.bombCollision)){
-					this.coordinate.setxReal(physicsX+xDelta);
+			
+			// CHECK X
+			boolean moveX = false;
+			if (xDelta != 0) {
+				int x;
+				if (xDelta > 0) {
+					// RIGHT
+					x = getCollisionMaxX();
+				} else {
+					// LEFT
+					x = getCollisionMinX();
 				}
-				if (!Handler.getGame().collision(physicsX,physicsY+yDelta,this.bombCollision)){
-					this.coordinate.setyReal(physicsY+yDelta);
+				x = x + (MOVE_PX*xDelta);
+				
+				Coordinate cd1 = new Coordinate(x,getCollisionMinY(),Coordinate.TYPE_REAL);
+				Coordinate cd2 = new Coordinate(x,getCollisionMaxY(),Coordinate.TYPE_REAL);
+				
+				if (this.coordinate.equals(cd2) && this.coordinate.equals(cd1)) {
+					moveX = true;
+				} else {
+					boolean collision = Handler.getGame().solidTileCheck(cd1.getTileX(), cd1.getTileY());
+					collision = collision || Handler.getGame().solidTileCheck(cd2.getTileX(), cd2.getTileY());
+					if (!collision) {
+						moveX = true;
+					}
 				}
-				int powerup = Handler.getGame().powerCheck(physicsX,physicsY);
-				if (powerup != 0) {
-					if (powerup == 1) {
+			}
+			
+			// CHECK Y
+			boolean moveY = false;
+			if (yDelta != 0) {
+				int y;
+				if (yDelta > 0) {
+					// DOWN
+					y = getCollisionMaxY();
+				} else {
+					// UP
+					y = getCollisionMinY();
+				}
+				y = y + (MOVE_PX*yDelta);
+				
+				Coordinate cd1 = new Coordinate(getCollisionMinX(),y,Coordinate.TYPE_REAL);
+				Coordinate cd2 = new Coordinate(getCollisionMaxX(),y,Coordinate.TYPE_REAL);
+				
+				if (this.coordinate.equals(cd2) && this.coordinate.equals(cd1)) {
+					moveY = true;
+				} else {
+					boolean collision = Handler.getGame().solidTileCheck(cd1.getTileX(), cd1.getTileY());
+					collision = collision || Handler.getGame().solidTileCheck(cd2.getTileX(), cd2.getTileY());
+					if (!collision) {
+						moveY = true;
+					}
+				}
+			}
+			
+			// DIAGONAL CHECK
+			if (moveX && moveY) {
+				int y;
+				if (yDelta > 0) {
+					// DOWN
+					y = getCollisionMaxY();
+				} else {
+					// UP
+					y = getCollisionMinY();
+				}
+				y = y + (MOVE_PX*yDelta);
+				int x;
+				if (xDelta > 0) {
+					// RIGHT
+					x = getCollisionMaxX();
+				} else {
+					// LEFT
+					x = getCollisionMinX();
+				}
+				x = x + (MOVE_PX*xDelta);
+				Coordinate cd = new Coordinate(x,y,Coordinate.TYPE_REAL);
+				
+				if (!this.coordinate.equals(cd)) {
+					boolean collision = Handler.getGame().solidTileCheck(cd.getTileX(), cd.getTileY());
+					if (collision) {
+						if (firstX) {
+							moveY = false;
+						} else {
+							moveX = false;
+						}
+					}
+				}
+				
+			}
+			
+			// COMMIT MOVEMENTS
+			if (moveX) {
+				this.coordinate.setRealX(this.coordinate.getRealX() + (MOVE_PX*xDelta));
+			}
+			
+			if (moveY) {
+				this.coordinate.setRealY(this.coordinate.getRealY() + (MOVE_PX*yDelta));
+			}
+			
+			// POWERUP CHECK
+			for (int x = getCollisionMinTileX(); x <= getCollisionMaxTileX(); x++) {
+				for (int y = getCollisionMinTileY(); y <= getCollisionMaxTileY(); y++) {
+					int power = Handler.getGame().powerTileCheck(x, y);
+					if (power == 1) {
 						this.bombsLeft++;
-					} else {
+					} else if (power == 2) {
 						this.firePower++;
 					}
 				}
-			} else {
-				this.coordinate.setyReal(physicsY+yDelta);
-				this.coordinate.setxReal(physicsX+xDelta);
 			}
+			
+		} else {
+			// NOT MOVING
 		}
-		if (Handler.getGame().burn(physicsX,physicsY)) {
-			this.alive = false;
-		}
+		
+		
 	}
 
 	public BufferedImage getDisplay() {
@@ -106,7 +202,7 @@ public class Player {
 		Graphics g = image.getGraphics();
 		
 		tick();
-                
+
 		g.drawImage(data.NIC.getPlayerFrame(color,currentAnim,currentFrame), 0, 0, 16, 25, null);
 		
 		return image;
@@ -116,7 +212,7 @@ public class Player {
 		boolean canPlant = this.bombsLeft > 0;
 		if (canPlant) {
 			this.bombsLeft--;
-			this.bombCollision = false;
+			this.cantCollideWith = new Coordinate(this.coordinate.getTileX(),this.coordinate.getTileY(),Coordinate.TYPE_TILE);
 		}
 		return canPlant;
 	}
@@ -142,34 +238,43 @@ public class Player {
 		}
 	}
 	
-	public void move(int actionCode) {
+	public void defaultAnimation() {
+		this.currentAnim = ANIM_MOVE_DOWN;
+		this.currentFrame = 2;
+	}
+	
+	public void receiveAction(int actionCode) {
 		int stateCode = actionCode%2;
 		int directionCode = actionCode - stateCode;
 		if (stateCode == KeyHandler.MOD_PRESS) {
 			if (directionCode == KeyHandler.ACTION_DOWN) {
-				yDelta = DELTA;
+				yDelta = 1;
+				this.firstX = false;
 				checkAnim();
 			} else if (directionCode == KeyHandler.ACTION_LEFT) {
-				xDelta = -DELTA;
+				xDelta = -1;
+				this.firstX = true;
 				checkAnim();
 			} else if (directionCode == KeyHandler.ACTION_RIGHT) {
-				xDelta = DELTA;
+				xDelta = 1;
+				this.firstX = true;
 				checkAnim();
 			} else if (directionCode == KeyHandler.ACTION_UP) {
-				yDelta = -DELTA;
+				yDelta = -1;
+				this.firstX = false;
 				checkAnim();
 			}
 		} else {
-			if (directionCode == KeyHandler.ACTION_DOWN && yDelta == DELTA) {
+			if (directionCode == KeyHandler.ACTION_DOWN && yDelta > 0) {
 				yDelta = 0;
 				checkAnim();
-			} else if (directionCode == KeyHandler.ACTION_LEFT && xDelta == -DELTA) {
+			} else if (directionCode == KeyHandler.ACTION_LEFT && xDelta < 0) {
 				xDelta = 0;
 				checkAnim();
-			} else if (directionCode == KeyHandler.ACTION_RIGHT && xDelta == DELTA) {
+			} else if (directionCode == KeyHandler.ACTION_RIGHT && xDelta > 0) {
 				xDelta = 0;
 				checkAnim();
-			} else if (directionCode == KeyHandler.ACTION_UP && yDelta == -DELTA) {
+			} else if (directionCode == KeyHandler.ACTION_UP && yDelta < 0) {
 				yDelta = 0;
 				checkAnim();
 			}
@@ -177,7 +282,55 @@ public class Player {
 	}
 	
 	//<editor-fold defaultstate="collapsed" desc="Getters & Setters">
-
+	
+	public int getImageX() {
+		return this.coordinate.getRealX()-DELTA_CENTER_X;
+	}
+	
+	public int getImageY() {
+		return this.coordinate.getRealY()-DELTA_CENTER_Y;
+	}
+	
+	public int getTileX() {
+		return this.coordinate.getTileX();
+	}
+	
+	public int getTileY() {
+		return this.coordinate.getTileY();
+	}
+	
+	private int getCollisionMinTileX() {
+		return new Coordinate(this.coordinate.getRealX() - COLLIDER_SIZE,this.coordinate.getRealY(),Coordinate.TYPE_REAL).getTileX();
+	}
+	
+	private int getCollisionMaxTileX() {
+		return new Coordinate(this.coordinate.getRealX() + COLLIDER_SIZE,this.coordinate.getRealY(),Coordinate.TYPE_REAL).getTileX();
+	}
+	
+	private int getCollisionMinTileY() {
+		return new Coordinate(this.coordinate.getRealX(),this.coordinate.getRealY() - COLLIDER_SIZE,Coordinate.TYPE_REAL).getTileY();
+	}
+	
+	private int getCollisionMaxTileY() {
+		return new Coordinate(this.coordinate.getRealX(),this.coordinate.getRealY() + COLLIDER_SIZE,Coordinate.TYPE_REAL).getTileY();
+	}
+	
+	private int getCollisionMinX() {
+		return this.coordinate.getRealX() - COLLIDER_SIZE;
+	}
+	
+	private int getCollisionMaxX() {
+		return this.coordinate.getRealX() + COLLIDER_SIZE;
+	}
+	
+	private int getCollisionMinY() {
+		return this.coordinate.getRealY() - COLLIDER_SIZE;
+	}
+	
+	private int getCollisionMaxY() {
+		return this.coordinate.getRealY() + COLLIDER_SIZE;
+	}
+	
 	/**
 	 * @return the firePower
 	 */
@@ -235,13 +388,6 @@ public class Player {
 	}
 
 	/**
-	 * @return the coordinate
-	 */
-	public Coordinate getCoordinate() {
-		return coordinate;
-	}
-
-	/**
 	 * @return the enabled
 	 */
 	public boolean isEnabled() {
@@ -253,13 +399,6 @@ public class Player {
 	 */
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
-	}
-
-	/**
-	 * @param coordinate the coordinate to set
-	 */
-	public void setCoordinate(Coordinate coordinate) {
-		this.coordinate = coordinate;
 	}
 	//</editor-fold>
 }

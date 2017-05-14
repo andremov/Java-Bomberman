@@ -85,16 +85,10 @@ public abstract class NIC {
 	}
 	
 	public static BufferedImage getExplosionFrame(int frameIndex, int type) {
-		int random;
+		int random = (int)(Math.ceil(Math.random()*4));
 		int frameDisplace = frameIndex*4*16;
 		int frameY = type*16;
-		if (type == model.Tile.TYPE_CENTER) {
-			random = 1;
-		} else {
-			random = (int)(Math.ceil(Math.random()*4));
-		}
 		int frameX = (random-1)*16;
-		// TODO missing rotation
 		return explosion.getSubimage(frameDisplace+frameX, frameY, 16, 16);
 	}
 	

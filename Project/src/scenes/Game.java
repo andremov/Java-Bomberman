@@ -21,8 +21,14 @@ import model.Tile;
  * @author Andres
  */
 public class Game extends Scene {
+	
+	public static final int COLLISION_NONE = 0;
+	public static final int COLLISION_WALL = 1;
+	public static final int COLLISION_BOMB = 2;
+	public static final int COLLISION_POWERUP_FIRE = 3;
+	public static final int COLLISION_POWERUP_BOMB = 4;
 
-	private static int BOMB_TIMER = 50;
+	private static final int BOMB_TIMER = 50;
 	
 	private ArrayList<Bomb> activeBombs;
 	private double globalTick;
@@ -39,9 +45,8 @@ public class Game extends Scene {
 				int tileDiff = 12;
 				int x = 1 + (i%2)*tileDiff;
 				int y = 1 + ((int)Math.floor(i/2))*tileDiff;
-				Coordinate tileCd = new Coordinate(Coordinate.TYPE_TILE,x,y);
-				
-				Handler.players[i].setCoordinate(tileCd);
+				Coordinate tileCd = new Coordinate(x,y,Coordinate.TYPE_TILE);
+				Handler.players[i].init(tileCd);
 			}
 		}
 	}
@@ -56,31 +61,23 @@ public class Game extends Scene {
 				int tileDiff = 12;
 				int x = 1 + (i%2)*tileDiff;
 				int y = 1 + ((int)Math.floor(i/2))*tileDiff;
-				Coordinate tileCd = new Coordinate(Coordinate.TYPE_TILE,x,y);
-				Handler.players[i].setAlive(true);
-                                Handler.players[i].setBombsLeft(1);
-                                Handler.players[i].setFirePower(2);
-				Handler.players[i].setCoordinate(tileCd);
+				Coordinate tileCd = new Coordinate(x,y,Coordinate.TYPE_TILE);
+				Handler.players[i].init(tileCd);
 			}
 		}
 	}
-        
-	public boolean collision(float x, float y, boolean canCollide) {
-		return gameMap.collision(x,y,canCollide);
+	
+	public boolean burnTileCheck(int tileX, int tileY) {
+		return gameMap.getTile(tileX, tileY).isBoom();
 	}
-
-	public boolean openSpace(float x, float y) {
-		return gameMap.openSpace(x,y);
+	
+	public boolean solidTileCheck(int tileX, int tileY) {
+		return gameMap.getTile(tileX, tileY).isBomb() || gameMap.getTile(tileX, tileY).isSolid();
 	}
-
-	public boolean burn(float x, float y) {
-		return gameMap.burn(x,y);
+	
+	public int powerTileCheck(int tileX, int tileY) {
+		return gameMap.getTile(tileX, tileY).takePowerup();
 	}
-        
-	public int powerCheck(float x, float y) {
-		return gameMap.powerCheck(x,y);
-        }
-        
         
 	@Override
 	public void receiveKeyAction(int actionCode) {
@@ -93,27 +90,30 @@ public class Game extends Scene {
 			if (Handler.players[player].plantBomb()) {
                             
 				plantBomb(Handler.players[player]);
-//				Handler.players[player].setBombsLeft(Handler.players[player].getBombsLeft()-1);
 			}
 		} else {
 			//MOVEMENT
-			Handler.players[player].move(action+state);
+			Handler.players[player].receiveAction(action+state);
 		}
 	}
 
 	private void plantBomb(Player owner){
 		activeBombs.add(new Bomb(owner, (int)(this.globalTick+BOMB_TIMER)));
-		gameMap.getTiles()[owner.getCoordinate().getxTile()][owner.getCoordinate().getyTile()].setObject(Tile.OBJECT_BOMB);
+		if (gameMap.getTile(owner.getTileX(),owner.getTileY()).isBoom()) {
+			explode(activeBombs.size()-1);
+		} else {
+			gameMap.getTile(owner.getTileX(),owner.getTileY()).setBomb();
+		}	
 	}
 	
 	private void explode(int indice) {
-		int startX = activeBombs.get(indice).x;
-		int startY = activeBombs.get(indice).y;
+		int startX = activeBombs.get(indice).xTile;
+		int startY = activeBombs.get(indice).yTile;
 		activeBombs.get(indice).owner.setBombsLeft(activeBombs.get(indice).owner.getBombsLeft()+1);
 		int max = activeBombs.get(indice).firePower;
 		activeBombs.remove(indice);
 		
-		gameMap.getTiles()[startX][startY].setObject(Tile.OBJECT_BOOM+Tile.TYPE_CENTER);
+		gameMap.getTile(startX,startY).setBoom(0,0);
 		
 		flare(max,startX,startY,1,0);
 		flare(max,startX,startY,-1,0);
@@ -123,32 +123,28 @@ public class Game extends Scene {
 	
 	private void flare(int fire, int tileX, int tileY, int deltaX, int deltaY) {
 		if (fire > 0) {
-			if (gameMap.getTiles()[tileX+deltaX][tileY+deltaY].isSolid()) {
-				if (gameMap.getTiles()[tileX+deltaX][tileY+deltaY].isBreakable()) {
-					gameMap.getTiles()[tileX+deltaX][tileY+deltaY].destroy();
+			if (gameMap.getTile(tileX+deltaX,tileY+deltaY).isSolid()) {
+				if (gameMap.getTile(tileX+deltaX,tileY+deltaY).isBreakable()) {
+					gameMap.getTile(tileX+deltaX,tileY+deltaY).destroyWall();
 				}
-			} else if (gameMap.getTiles()[tileX+deltaX][tileY+deltaY].isBomb()) {
-                                for (int i = 0; i < activeBombs.size(); i++) {
-                                    if (tileX+deltaX == activeBombs.get(i).x && tileY+deltaY == activeBombs.get(i).y){
-                                        explode(i);
-                                    }
-                                }
-			} else if (!gameMap.getTiles()[tileX+deltaX][tileY+deltaY].isCenterBoom()){
-				int type = Tile.OBJECT_BOOM;
-				if (deltaY > 0) {
-					type = type + Tile.TYPE_ROTATE;
-				} else if (deltaY < 0) {
-					type = type + (Tile.TYPE_ROTATE*3);
-				} else if (deltaX < 0) {
-					type = type + (Tile.TYPE_ROTATE*2);
+			} else if (gameMap.getTile(tileX+deltaX,tileY+deltaY).isBomb()) {
+				for (int i = 0; i < activeBombs.size(); i++) {
+					if (tileX+deltaX == activeBombs.get(i).xTile && tileY+deltaY == activeBombs.get(i).yTile){
+						explode(i);
+					}
 				}
+			} else {
+				int boomX = deltaX;
+				int boomY = deltaY;
 				if (fire == 1) {
-					type = type + Tile.TYPE_TIP;
-				} else {
-					type = type + Tile.TYPE_LONG;
+					if (Math.abs(boomX) == 1) {
+						boomX = boomX*2;
+					} else {
+						boomY = boomY*2;
+					}
 				}
-
-				gameMap.getTiles()[tileX+deltaX][tileY+deltaY].setObject(type);
+				gameMap.getTile(tileX+deltaX, tileY+deltaY).setBoom(boomX, boomY);
+//				gameMap.getTile(tileX+deltaX,tileY+deltaY).setObject(type);
 				flare(fire-1,tileX+deltaX,tileY+deltaY,deltaX,deltaY);
 			}
 		}
@@ -161,7 +157,6 @@ public class Game extends Scene {
 		Graphics g = image.getGraphics();
 		
 		this.globalTick++;
-//		boolean doCycle = !
 		while (!activeBombs.isEmpty() && activeBombs.get(0).explodeTick <= globalTick) {
 			explode(0);
 		}
@@ -170,10 +165,8 @@ public class Game extends Scene {
 		
 		for (int i = 0; i < Handler.players.length; i++) {
 			if (Handler.players[i].isEnabled() && Handler.players[i].isAlive()) {
-				Coordinate playerCoordinates = Handler.players[i].getCoordinate();
-				int displayX = (int)playerCoordinates.getxReal()-Player.DELTA_CENTER_X;
-				int displayY = (int)playerCoordinates.getyReal()-Player.DELTA_CENTER_Y;
-				g.drawImage(Handler.players[i].getDisplay(),displayX,displayY,null);
+				Player thisPlayer = Handler.players[i];
+				g.drawImage(thisPlayer.getDisplay(),thisPlayer.getImageX(),thisPlayer.getImageY(),null);
 			}
 		}
 		
@@ -183,15 +176,15 @@ public class Game extends Scene {
 	private class Bomb {
 		int firePower;
 		int explodeTick;
-		int x;
-		int y;
+		int xTile;
+		int yTile;
 		Player owner;
 		
 		public Bomb(Player owner, int explodeTick) {
 			this.firePower = owner.getFirePower();
 			this.explodeTick = explodeTick;
-			this.x = owner.getCoordinate().getxTile();
-			this.y = owner.getCoordinate().getyTile();
+			this.xTile = owner.getTileX();
+			this.yTile = owner.getTileY();
 			this.owner = owner;
 		}
 	}

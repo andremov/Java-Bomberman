@@ -16,10 +16,10 @@ import view.Window;
  */
 public class Handler {
 
-        public static final int SCREEN_SIZE = 600;
-        public static final int TILE_SIZE = 16;
-        public static Scene currentScene;
-	
+	public static final int SCREEN_SIZE = 600;
+	public static final int TILE_SIZE = 16;
+	public static Scene currentScene;
+
 	public static Player[] players;
 	private Window gameWindow;
 	
@@ -49,12 +49,12 @@ public class Handler {
 		players[index] = new Player();
 	}
         
-        public static scenes.Game getGame() {
-            scenes.Game a = null;
-            if (currentScene instanceof scenes.Game) {
-                a = (scenes.Game)currentScene;
-            }
-            return a;
-        }
+	public static scenes.Game getGame() {
+		scenes.Game g = null;
+		if (currentScene instanceof scenes.Game) {
+			g = (scenes.Game)currentScene;
+		}
+		return g;
+	}
 	
 }

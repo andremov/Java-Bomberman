@@ -14,92 +14,102 @@ public class Coordinate {
 	public static int TYPE_TILE = 0;
 	public static int TYPE_REAL = 1;
 	
-	private int xTile;
-	private int yTile;
-	private float xReal;
-	private float yReal;
+	private int tileX;
+	private int tileY;
+	private int realX;
+	private int realY;
 
-	public Coordinate(int type, float x, float y) {
+	public Coordinate(int x, int y, int type) {
 		if (type == TYPE_TILE) {
-			this.xTile = (int)x;
-			this.yTile = (int)y;
+			this.tileX = x;
+			this.tileY = y;
 			
 			updateReals();
 		} else {
-			this.xReal = x;
-			this.yReal = y;
+			this.realX = x;
+			this.realY = y;
 			
 			updateTiles();
 		}
 	}
 
 	private void updateReals() {
-		this.xReal = (this.getxTile() * Handler.TILE_SIZE + (Handler.TILE_SIZE/2));
-		this.yReal = (this.getyTile() * Handler.TILE_SIZE + (Handler.TILE_SIZE/2));
+		this.realX = (this.getTileX() * Handler.TILE_SIZE + (Handler.TILE_SIZE/2));
+		this.realY = (this.getTileY() * Handler.TILE_SIZE + (Handler.TILE_SIZE/2));
 	}
 	
 	private void updateTiles() {
-		this.xTile = ((int) Math.floor(this.getxReal() / Handler.TILE_SIZE));
-		this.yTile = ((int) Math.floor(this.getyReal() / Handler.TILE_SIZE));
+		this.tileX = ((int) Math.floor(this.getRealX() / Handler.TILE_SIZE));
+		this.tileY = ((int) Math.floor(this.getRealY() / Handler.TILE_SIZE));
 	}
 
 	/**
-	 * @return the xTile
+	 * @return the tileX
 	 */
-	public int getxTile() {
-		return xTile;
+	public int getTileX() {
+		return tileX;
 	}
 
 	/**
-	 * @param xTile the xTile to set
+	 * @param tileX the tileX to set
 	 */
-	public void setxTile(int xTile) {
-		this.xTile = xTile;
+	public void setTileX(int tileX) {
+		this.tileX = tileX;
 		updateReals();
 	}
 
 	/**
-	 * @return the yTile
+	 * @return the tileY
 	 */
-	public int getyTile() {
-		return yTile;
+	public int getTileY() {
+		return tileY;
 	}
 
 	/**
-	 * @param yTile the yTile to set
+	 * @param tileY the tileY to set
 	 */
-	public void setyTile(int yTile) {
-		this.yTile = yTile;
+	public void setTileY(int tileY) {
+		this.tileY = tileY;
 		updateReals();
 	}
 
 	/**
-	 * @return the xReal
+	 * @return the realX
 	 */
-	public float getxReal() {
-		return xReal;
+	public int getRealX() {
+		return realX;
 	}
 
 	/**
-	 * @param xReal the xReal to set
+	 * @param realX the realX to set
 	 */
-	public void setxReal(float xReal) {
-		this.xReal = xReal;
+	public void setRealX(int realX) {
+		this.realX = realX;
 		updateTiles();
 	}
 
 	/**
-	 * @return the yReal
+	 * @return the realY
 	 */
-	public float getyReal() {
-		return yReal;
+	public int getRealY() {
+		return realY;
 	}
 
 	/**
-	 * @param yReal the yReal to set
+	 * @param realY the realY to set
 	 */
-	public void setyReal(float yReal) {
-		this.yReal = yReal;
+	public void setRealY(int realY) {
+		this.realY = realY;
 		updateTiles();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		boolean value = false;
+		if (obj instanceof Coordinate) {
+			Coordinate cd = (Coordinate) obj;
+			value = this.getTileX() == cd.getTileX() && this.getTileY() == cd.getTileY();
+		}
+		return value;
 	}
 }

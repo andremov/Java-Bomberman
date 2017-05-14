@@ -27,38 +27,22 @@ public class Display extends Canvas implements Runnable {
 	}
 
 	@Override
-	public void paint(Graphics g) {
-//		try{
-//			lastFrame = Handler.currentScene.getDisplay();
-//			g.drawImage (lastFrame,0,0,getWidth(),getHeight(),null);
-//		} catch (Exception e) {
-//			System.err.println("ERROR! "+e.toString());
-//			g.drawImage (lastFrame,0,0,getWidth(),getHeight(),null);
-//		}
-	}
-
-	@Override
 	public void run() {
 		createBufferStrategy(2);
 		while (true){
-                    
-                           Graphics g = getBufferStrategy().getDrawGraphics();
-                           try {
-			lastFrame = Handler.currentScene.getDisplay();
-                           }catch(Exception e){}
+            Graphics g = getBufferStrategy().getDrawGraphics();
+			
+			try {
+				lastFrame = Handler.currentScene.getDisplay();
+			}catch(Exception e) { }
+			
 			g.drawImage (lastFrame,0,0,getWidth(),getHeight(),null);
                         
-                        getBufferStrategy().show();
-//                        if (getBufferStrategy().contentsLost()){
-                            
-//                        } else {
-//                            repaint();
-//                        }
+			getBufferStrategy().show();
+			
 			try {
 				Thread.sleep(50);
-			} catch (Exception e) {
-				
-			}
+			} catch (Exception e) { }
 		}
 	}
 	

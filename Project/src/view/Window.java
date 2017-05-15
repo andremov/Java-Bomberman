@@ -7,7 +7,6 @@ package view;
 
 import control.KeyHandler;
 import javax.swing.JFrame;
-import model.Handler;
 
 /**
  *
@@ -18,9 +17,10 @@ public class Window extends JFrame {
 	Display canvas;
 	Thread canvasThread;
 	
-	public Window(Handler h) {
+	public Window() {
 		setLayout(null);
-		setSize(Handler.SCREEN_SIZE+6,Handler.SCREEN_SIZE+29);
+		int size = bomberman.Bomberman.SCREEN_SIZE;
+		setSize(size+6,size+29);
 		setLocationRelativeTo(null);
 		setTitle("Bomberman");
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -29,8 +29,8 @@ public class Window extends JFrame {
 		addKeyListener(new KeyHandler());
 		
 		
-		canvas = new Display(h);
-		canvas.setSize(Handler.SCREEN_SIZE,Handler.SCREEN_SIZE);
+		canvas = new Display();
+		canvas.setSize(size,size);
 		add(canvas);
 		
 		canvasThread = new Thread(canvas);

@@ -18,7 +18,7 @@ public class Tile {
 	private static final int OBJECT_EMPTY = 0;
 	private static final int OBJECT_BLOCK = 1;
 	private static final int OBJECT_WALL = 2;
-	private static final int OBJECT_BOMB = 3;
+	public static final int OBJECT_BOMB = 3;
 	private static final int OBJECT_POWERUP_BOMB = 4;
 	private static final int OBJECT_POWERUP_FIRE = 5;
 	private static final int OBJECT_BOOM = 6;
@@ -92,16 +92,17 @@ public class Tile {
 	}
 
 	public BufferedImage getImage() {
-		BufferedImage image = new BufferedImage(Handler.TILE_SIZE, Handler.TILE_SIZE, BufferedImage.TYPE_INT_ARGB);
+		int tileSize = bomberman.Bomberman.TILE_SIZE;
+		BufferedImage image = new BufferedImage(tileSize, tileSize, BufferedImage.TYPE_INT_ARGB);
 		Graphics g = image.getGraphics();
 		
-		g.drawImage(NIC.getTile(2), 0, 0, Handler.TILE_SIZE, Handler.TILE_SIZE, null);
+		g.drawImage(NIC.getTile(2), 0, 0, tileSize, tileSize, null);
 		
 		if (this.object != OBJECT_EMPTY) {
 			if (this.object == OBJECT_BLOCK) {
-				g.drawImage(NIC.getTile(0), 0, 0, Handler.TILE_SIZE, Handler.TILE_SIZE, null);
+				g.drawImage(NIC.getTile(0), 0, 0, tileSize, tileSize, null);
 			} else if (this.object == OBJECT_WALL) {
-				g.drawImage(NIC.getTile(1), 0, 0, Handler.TILE_SIZE, Handler.TILE_SIZE, null);
+				g.drawImage(NIC.getTile(1), 0, 0, tileSize, tileSize, null);
 			} else {
 				this.frame = this.frame + this.delta;
 				if (this.frame == 0) {
@@ -111,11 +112,11 @@ public class Tile {
 					if (this.frame == BOMB_MAX_SPRITE-1) {
 						this.delta = -1;
 					}
-					g.drawImage(NIC.getBombFrame(this.frame), 0, 0, Handler.TILE_SIZE, Handler.TILE_SIZE, null);
+					g.drawImage(NIC.getBombFrame(this.frame), 0, 0, tileSize, tileSize, null);
 				} else if (this.object == OBJECT_POWERUP_BOMB) {
-					g.drawImage(NIC.getPowerupFrame(0,this.frame%2), 0, 0, Handler.TILE_SIZE, Handler.TILE_SIZE, null);
+					g.drawImage(NIC.getPowerupFrame(0,this.frame%2), 0, 0, tileSize, tileSize, null);
 				} else if (this.object == OBJECT_POWERUP_FIRE) {
-					g.drawImage(NIC.getPowerupFrame(1,this.frame%2), 0, 0, Handler.TILE_SIZE, Handler.TILE_SIZE, null);
+					g.drawImage(NIC.getPowerupFrame(1,this.frame%2), 0, 0, tileSize, tileSize, null);
 				} else if (this.object >= OBJECT_BOOM) {
 					int type = this.object-OBJECT_BOOM;
 					if (this.frame == 1 && this.delta == -1) {
@@ -133,15 +134,15 @@ public class Tile {
 						type = type-(BOOM_MOD_ROTATE*rotations);
 
 						if (rotations == 1) {
-							y = -Handler.TILE_SIZE;
+							y = -tileSize;
 						} else if(rotations == 2){
-							x = -Handler.TILE_SIZE;
-							y = -Handler.TILE_SIZE;
+							x = -tileSize;
+							y = -tileSize;
 						} else if (rotations == 3) {
-							x = -Handler.TILE_SIZE;
+							x = -tileSize;
 						}
 					}
-					g.drawImage(NIC.getExplosionFrame(this.frame, type), x, y, Handler.TILE_SIZE, Handler.TILE_SIZE, null);
+					g.drawImage(NIC.getExplosionFrame(this.frame, type), x, y, tileSize, tileSize, null);
 				}
 				
 			}
@@ -171,9 +172,9 @@ public class Tile {
 		this.frame = -1;
 		this.delta = 1;
 	}
-	
-	public void setBomb() {
-		this.setObject(OBJECT_BOMB);
+
+	public int getObject() {
+		return object;
 	}
 	
 	public void setBoom(int x, int y) {

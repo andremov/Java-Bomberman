@@ -9,16 +9,12 @@ package control;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import javax.swing.JOptionPane;
-import model.Handler;
 
 /**
  *
  * @author Andres
  */
 public class KeyHandler extends KeyAdapter {
-	
-	private final static boolean doExitCheck = false;
 	
 	public final static int ACTION_NONE = -100;
 	
@@ -39,69 +35,37 @@ public class KeyHandler extends KeyAdapter {
 	
 	private void parseKey(KeyEvent key, int state) {
 		boolean acceptedKey = false;
-		int playerMod = 0;
 		int actionMod = ACTION_NONE;
 		
-		if (key.getKeyCode() == KeyEvent.VK_UP || key.getKeyCode() == KeyEvent.VK_W) {
+		if (key.getKeyCode() == KeyEvent.VK_W) {
 			acceptedKey = true;
 			actionMod = ACTION_UP;
-			if (key.getKeyCode() == KeyEvent.VK_UP) {
-				playerMod = MOD_PLAYER;
-			}
-		} else if (key.getKeyCode() == KeyEvent.VK_DOWN || key.getKeyCode() == KeyEvent.VK_S) {
+		} else if (key.getKeyCode() == KeyEvent.VK_S) {
 			acceptedKey = true;
 			actionMod = ACTION_DOWN;
-			if (key.getKeyCode() == KeyEvent.VK_DOWN) {
-				playerMod = MOD_PLAYER;
-			}
-		} else if (key.getKeyCode() == KeyEvent.VK_LEFT || key.getKeyCode() == KeyEvent.VK_A) {
+		} else if (key.getKeyCode() == KeyEvent.VK_A) {
 			acceptedKey = true;
 			actionMod = ACTION_LEFT;
-			if (key.getKeyCode() == KeyEvent.VK_LEFT) {
-				playerMod = MOD_PLAYER;
-			}
-		} else if (key.getKeyCode() == KeyEvent.VK_RIGHT || key.getKeyCode() == KeyEvent.VK_D) {
+		} else if (key.getKeyCode() == KeyEvent.VK_D) {
 			acceptedKey = true;
 			actionMod = ACTION_RIGHT;
-			if (key.getKeyCode() == KeyEvent.VK_RIGHT) {
-				playerMod = MOD_PLAYER;
-			}
-//		} else if (key.getKeyCode() == KeyEvent.VK_K) {
-//			acceptedKey = true;
-//			sendAction = ACTION_B;
-		} else if (key.getKeyCode() == KeyEvent.VK_F || key.getKeyCode() == KeyEvent.VK_NUMPAD3) {
+		} else if (key.getKeyCode() == KeyEvent.VK_NUMPAD3) {
 			acceptedKey = true;
 			actionMod = ACTION_A;
-			if (key.getKeyCode() == KeyEvent.VK_NUMPAD3) {
-				playerMod = MOD_PLAYER;
-			}
-//		} else if (key.getKeyCode() == KeyEvent.VK_ENTER) {
-//			acceptedKey = true;
-//			sendAction = ACTION_START;
-		} else if (key.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                    Handler.getGame().start();
-//			acceptedKey = true;
-//			sendAction = ACTION_BACK;
-//			if (doExitCheck) {
-//				String[] options = {"SI","NO"};
-//				int n = JOptionPane.showOptionDialog(null,"Desea cerrar?","",JOptionPane.YES_NO_OPTION,JOptionPane.QUESTION_MESSAGE,null,options,"");
-//				if(n == 0) {
-//					System.exit(0);
-//				}
-//			} else {
-//				System.exit(0);
-//			}
+//		} else if (key.getKeyCode() == KeyEvent.VK_ESCAPE) {
+//			Handler.getGame().start();
 		}
 		
 		if (acceptedKey) {
-			Handler.currentScene.receiveKeyAction(state+playerMod+actionMod);
+			model.Handler.receiveKeyAction(state+actionMod);
+		} else if (state == MOD_RELEASE) {
+			model.Handler.otherKey(key);
 		}
 	}
 	
 	@Override
 	public void keyReleased(KeyEvent key) {
 		parseKey(key, MOD_RELEASE);
-
 	}
 	
 	@Override

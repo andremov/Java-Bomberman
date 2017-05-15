@@ -66,7 +66,7 @@ public abstract class NIC {
 		int playerSpriteSheets = 5;
 		playerSprites = new BufferedImage[playerSpriteSheets];
 		for (int i = 0; i < playerSpriteSheets; i++) {
-			playerSprites[i] = ImageIO.read(new File("assets/player"+(i+1)+".png"));
+			playerSprites[i] = ImageIO.read(new File("assets/player"+i+".png"));
 		}
 		
 		
@@ -94,7 +94,7 @@ public abstract class NIC {
 	
 	public static BufferedImage getPlayerFrame(int playerColor, int anim, int frame) {
 		BufferedImage thisSheet;
-		thisSheet = playerSprites[playerColor-1];
+		thisSheet = playerSprites[playerColor];
 		int x;
 		int y;
 		if (anim < 5) {

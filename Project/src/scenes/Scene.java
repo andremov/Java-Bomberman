@@ -7,6 +7,7 @@
  */
 package scenes;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -20,12 +21,12 @@ import model.Handler;
  */
 public abstract class Scene {
 
-	protected final Handler main;
+	public static int CODE_INVALID = -1000;
+
 	private final String name;
 	private final boolean full;
 
-	public Scene(Handler main, String name, boolean full) {
-		this.main = main;
+	public Scene(String name, boolean full) {
 		this.name = name;
 		this.full = full;
 	}
@@ -108,6 +109,10 @@ public abstract class Scene {
 	 */
 	public boolean isFull() {
 		return full;
+	}
+	
+	protected Color color(double h, double s, double b) {
+		return Color.getHSBColor((float)(h/360f),(float)(s/100f),(float)(b/100f));
 	}
 	
 	protected String[] genMultilineText(String originalText, int charsInLine) {

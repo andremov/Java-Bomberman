@@ -9,7 +9,7 @@ import control.KeyHandler;
 import java.awt.Canvas;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import model.Handler;
+import model.Client;
 
 /**
  *
@@ -17,12 +17,11 @@ import model.Handler;
  */
 public class Display extends Canvas implements Runnable {
 
-	private Handler h;
 	private BufferedImage lastFrame;
 			
-	public Display(Handler h) {
-		this.h = h;
-		lastFrame = new BufferedImage(Handler.SCREEN_SIZE,Handler.SCREEN_SIZE,BufferedImage.TYPE_INT_ARGB);
+	public Display() {
+		int size = bomberman.Bomberman.SCREEN_SIZE;
+		lastFrame = new BufferedImage(size, size,BufferedImage.TYPE_INT_ARGB);
 		addKeyListener(new KeyHandler());
 	}
 
@@ -33,8 +32,10 @@ public class Display extends Canvas implements Runnable {
             Graphics g = getBufferStrategy().getDrawGraphics();
 			
 			try {
-				lastFrame = Handler.currentScene.getDisplay();
-			}catch(Exception e) { }
+				lastFrame = model.Handler.getDisplay();
+			}catch(Exception e) {
+				System.err.println("Error display.");
+			}
 			
 			g.drawImage (lastFrame,0,0,getWidth(),getHeight(),null);
                         

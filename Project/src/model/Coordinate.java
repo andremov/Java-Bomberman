@@ -34,13 +34,15 @@ public class Coordinate {
 	}
 
 	private void updateReals() {
-		this.realX = (this.getTileX() * Handler.TILE_SIZE + (Handler.TILE_SIZE/2));
-		this.realY = (this.getTileY() * Handler.TILE_SIZE + (Handler.TILE_SIZE/2));
+		int tileSize = bomberman.Bomberman.TILE_SIZE;
+		this.realX = (this.getTileX() * tileSize + (tileSize/2));
+		this.realY = (this.getTileY() * tileSize + (tileSize/2));
 	}
 	
 	private void updateTiles() {
-		this.tileX = ((int) Math.floor(this.getRealX() / Handler.TILE_SIZE));
-		this.tileY = ((int) Math.floor(this.getRealY() / Handler.TILE_SIZE));
+		int tileSize = bomberman.Bomberman.TILE_SIZE;
+		this.tileX = ((int) Math.floor(this.getRealX() / tileSize));
+		this.tileY = ((int) Math.floor(this.getRealY() / tileSize));
 	}
 
 	/**

@@ -8,6 +8,9 @@ package model;
 import control.KeyHandler;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 
 /**
  *
@@ -40,10 +43,15 @@ public class Player {
 	private boolean moving;
 	private boolean firstX;
 	private Coordinate cantCollideWith;
+    private BufferedReader in;
+    private PrintWriter out;
+	public int timeOuts;
 	
 	public Player() {
 		this.enabled = false;
 		this.cantCollideWith = null;
+		this.timeOuts = 0;
+		defaultAnimation();
 	}
 	
 	public void init(Coordinate cd) {
@@ -201,9 +209,14 @@ public class Player {
 		BufferedImage image = new BufferedImage(16, 25, BufferedImage.TYPE_INT_ARGB);
 		Graphics g = image.getGraphics();
 		
-		tick();
-
-		g.drawImage(data.NIC.getPlayerFrame(color,currentAnim,currentFrame), 0, 0, 16, 25, null);
+		if (Handler.getGame() != null) {
+			tick();
+		}
+		int trueColor = color;
+		if (!isEnabled()) {
+			trueColor = 0;
+		}
+		g.drawImage(data.NIC.getPlayerFrame(trueColor,currentAnim,currentFrame), 0, 0, 16, 25, null);
 		
 		return image;
 	}
@@ -282,6 +295,21 @@ public class Player {
 	}
 	
 	//<editor-fold defaultstate="collapsed" desc="Getters & Setters">
+	
+	public int getRawX() {
+		return this.coordinate.getRealX();
+	}
+	
+	public int getRawY() {
+		return this.coordinate.getRealY();
+	}
+	public void setRawX(int x) {
+		this.coordinate.setRealX(x);
+	}
+	
+	public void setRawY(int y) {
+		this.coordinate.setRealY(y);
+	}
 	
 	public int getImageX() {
 		return this.coordinate.getRealX()-DELTA_CENTER_X;
@@ -401,4 +429,29 @@ public class Player {
 		this.enabled = enabled;
 	}
 	//</editor-fold>
+
+	/**
+	 * @param socket the socket to set
+	 */
+	public void setSocket(java.net.Socket socket) {
+		try {
+			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			out = new PrintWriter(socket.getOutputStream(), true);
+		} catch (Exception e) { }
+	}
+
+	/**
+	 * @return the in
+	 */
+	public BufferedReader getIn() {
+		return in;
+	}
+
+	/**
+	 * @return the out
+	 */
+	public PrintWriter getOut() {
+		return out;
+	}
+
 }

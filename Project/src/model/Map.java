@@ -27,14 +27,14 @@ public class Map {
 	}
 	
 	public BufferedImage getDisplay() {
-		int mapSize = Handler.TILE_SIZE*data.NIC.SIZE_MAP;
+		int mapSize = bomberman.Bomberman.TILE_SIZE*data.NIC.SIZE_MAP;
 		BufferedImage image = new BufferedImage(mapSize, mapSize, BufferedImage.TYPE_INT_ARGB);
 		Graphics g = image.getGraphics();
 		
 		for (int i = 0; i < data.NIC.SIZE_MAP; i++) {
 			for (int j = 0; j < data.NIC.SIZE_MAP; j++) {
-				int posX = i*Handler.TILE_SIZE;
-				int posY = j*Handler.TILE_SIZE;
+				int posX = i*bomberman.Bomberman.TILE_SIZE;
+				int posY = j*bomberman.Bomberman.TILE_SIZE;
 				g.drawImage(getTile(i,j).getImage(), posX, posY, null);
 			}
 		}

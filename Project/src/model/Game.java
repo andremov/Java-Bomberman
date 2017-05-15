@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package scenes;
+package model;
 
 import control.KeyHandler;
 import java.awt.Graphics;
@@ -14,7 +14,7 @@ import model.Coordinate;
 import model.Handler;
 import model.Map;
 import model.Player;
-import model.Tile;
+import scenes.Scene;
 
 /**
  *
@@ -33,9 +33,10 @@ public class Game extends Scene {
 	private ArrayList<Bomb> activeBombs;
 	private double globalTick;
 	Map gameMap;
+	private String changes;
 	
-	public Game(Handler main, boolean full) {
-		super(main, "Game", full);
+	public Game() {
+		super("Game", true);
 		this.globalTick = 0;
 		activeBombs = new ArrayList<>();
 		gameMap = new Map();
@@ -51,6 +52,37 @@ public class Game extends Scene {
 		}
 	}
 
+	public String getChanges() {
+		String temp = changes;
+		changes = "";
+		return temp;
+	}
+	
+	private void addChange(int x, int y) {
+		if (changes.isEmpty()) {
+			changes = "MAP!";
+		}
+		changes = changes + x+","+y+"="+gameMap.getTile(x, y).getObject()+";";
+	}
+	
+	private void removeChange(int x, int y) {
+		String change = x+","+y+"="+gameMap.getTile(x, y).getObject()+";";
+		if (changes.contains(change)) {
+			changes.replace(change, "");
+		}
+	}
+	
+	public void applyChanges(String changes) {
+		for (int i = 0; i < changes.split(";").length; i++) {
+			String thisChange = changes.split(";")[i];
+			int x = Integer.parseInt(thisChange.split("=")[0].split(",")[0]);
+			int y = Integer.parseInt(thisChange.split("=")[0].split(",")[1]);
+			int state = Integer.parseInt(thisChange.split("=")[1]);
+			gameMap.getTile(x, y).setObject(state);
+			removeChange(x,y);
+		}
+	}
+	
 	public void start() {
 		this.globalTick = 0;
 		gameMap = new Map();
@@ -88,7 +120,7 @@ public class Game extends Scene {
 		if (action == KeyHandler.ACTION_A && state == KeyHandler.MOD_RELEASE) {
 			// BOMB
 			if (Handler.players[player].plantBomb()) {
-                            
+                
 				plantBomb(Handler.players[player]);
 			}
 		} else {
@@ -102,8 +134,9 @@ public class Game extends Scene {
 		if (gameMap.getTile(owner.getTileX(),owner.getTileY()).isBoom()) {
 			explode(activeBombs.size()-1);
 		} else {
-			gameMap.getTile(owner.getTileX(),owner.getTileY()).setBomb();
-		}	
+			gameMap.getTile(owner.getTileX(),owner.getTileY()).setObject(Tile.OBJECT_BOMB);
+			addChange(owner.getTileX(),owner.getTileY());
+		}
 	}
 	
 	private void explode(int indice) {
@@ -114,6 +147,7 @@ public class Game extends Scene {
 		activeBombs.remove(indice);
 		
 		gameMap.getTile(startX,startY).setBoom(0,0);
+		addChange(startX,startY);
 		
 		flare(max,startX,startY,1,0);
 		flare(max,startX,startY,-1,0);
@@ -147,12 +181,13 @@ public class Game extends Scene {
 //				gameMap.getTile(tileX+deltaX,tileY+deltaY).setObject(type);
 				flare(fire-1,tileX+deltaX,tileY+deltaY,deltaX,deltaY);
 			}
+			addChange(tileX+deltaX,tileY+deltaY);
 		}
 	}
 
 	@Override
 	public BufferedImage getDisplay() throws IOException {
-		int mapSize = Handler.TILE_SIZE*data.NIC.SIZE_MAP;
+		int mapSize = bomberman.Bomberman.TILE_SIZE*data.NIC.SIZE_MAP;
 		BufferedImage image = new BufferedImage(mapSize, mapSize, BufferedImage.TYPE_INT_ARGB);
 		Graphics g = image.getGraphics();
 		

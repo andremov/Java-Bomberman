@@ -27,6 +27,7 @@ public class Window extends JFrame {
 		setResizable(false);
 //		setUndecorated(true);
 		addKeyListener(new KeyHandler());
+		setIconImage(new javax.swing.ImageIcon("assets/icon.png").getImage());
 		
 		
 		canvas = new Display();

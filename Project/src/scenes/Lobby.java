@@ -75,13 +75,17 @@ public class Lobby extends Scene {
 	 */
 	public void checkReady() {
 		boolean go = true;
+                int onPlayers = 0;
 		for (int i = 0; i < ready.length; i++) {
 			if (!ready[i] && Handler.players[i].isEnabled()) {
 				// not ready, is enabled
 				go = false;
 			}
+                        if (Handler.players[i].isEnabled()) {
+                            onPlayers++;
+                        }
 		}
-		if (go) {
+		if (go && onPlayers > 1) {
 			try {
 				Thread.sleep(100);
 			} catch (Exception e) { }

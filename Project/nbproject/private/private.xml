@@ -5,8 +5,9 @@
         <group>
             <file>file:/D:/Developer/NetBeans/Java-Bomberman/Project/src/model/Handler.java</file>
             <file>file:/D:/Developer/NetBeans/Java-Bomberman/Project/src/model/Server.java</file>
+            <file>file:/D:/Developer/NetBeans/Java-Bomberman/Project/src/view/Display.java</file>
+            <file>file:/D:/Developer/NetBeans/Java-Bomberman/Project/src/scenes/Game.java</file>
             <file>file:/D:/Developer/NetBeans/Java-Bomberman/Project/src/bomberman/Bomberman.java</file>
-            <file>file:/D:/Developer/NetBeans/Java-Bomberman/Project/src/scenes/Lobby.java</file>
             <file>file:/D:/Developer/NetBeans/Java-Bomberman/Project/src/model/Client.java</file>
         </group>
     </open-files>

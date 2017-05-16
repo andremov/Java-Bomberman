@@ -86,10 +86,10 @@ public class Lobby extends Scene {
                         }
 		}
 		if (go && onPlayers > 1) {
-			try {
-				Thread.sleep(100);
-			} catch (Exception e) { }
-			Handler.engageGame(wins,roundsPlayed);
+//			try {
+//				Thread.sleep(100);
+//			} catch (Exception e) { }
+			Handler.engageGame();
 		}
 	}
 	

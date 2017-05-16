@@ -318,12 +318,14 @@ public class Game extends Scene {
 		Graphics g = image.getGraphics();
 		
 		this.globalTick++;
-                while (!(gameMap.getTile(activeBombs[0].xTile,activeBombs[0].yTile).isBomb())) {
-                    removeBomb(0);
+                if (numBombs > 0) {
+                    while (numBombs > 0 && !(gameMap.getTile(activeBombs[0].xTile,activeBombs[0].yTile).isBomb())) {
+                        removeBomb(0);
+                    }
+                    while (numBombs > 0 && activeBombs[0].explodeTick <= globalTick) {
+                        explode(0);
+                    }
                 }
-		while (numBombs > 0 && activeBombs[0].explodeTick <= globalTick) {
-                    explode(0);
-		}
 		
 		g.drawImage(gameMap.getDisplay(), 0, 0, mapSize, mapSize, null);
 		

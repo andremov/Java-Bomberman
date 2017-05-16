@@ -49,9 +49,9 @@ public class Client implements Runnable {
 		((scenes.Connection) model.Handler.currentScene).setMessage(scenes.Connection.MSG_CONNECTING);
 		System.out.println("Connecting to "+serverAddress);
 		
-		try {
-			Thread.sleep(10);
-		} catch (Exception e1) { }
+//		try {
+//			Thread.sleep(10);
+//		} catch (Exception e1) { }
 		
 		try {
 			socket = new Socket(serverAddress, bomberman.Bomberman.PORT);

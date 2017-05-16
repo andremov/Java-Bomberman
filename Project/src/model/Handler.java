@@ -65,11 +65,10 @@ public class Handler {
 	 * @param wins
 	 * @param rounds 
 	 */
-	public static void engageGame(int[] wins, int rounds) {
+	public static void engageGame() {
 		if (server != null) {
-			server.wins = wins;
-			server.rounds = rounds;
-			currentScene = new Game();
+                        currentScene = new Game();
+//                        System.out.println("GAME");
 		}
 	}
 	
@@ -94,9 +93,9 @@ public class Handler {
 				server.wins[index] = server.wins[index] + 1;
 				server.rounds = server.rounds+1;
 
-				try {
-					Thread.sleep(100);
-				} catch (Exception e) { }
+//				try {
+//					Thread.sleep(100);
+//				} catch (Exception e) { }
 
 				for (int i = 0; i < NUM_PLAYERS; i++) {
 					players[i].defaultAnimation();
@@ -104,9 +103,9 @@ public class Handler {
 				currentScene = new Lobby(server.getAddress(), server.wins, server.rounds);
 			} else if (numActivePlayers == 0) {
 
-				try {
-					Thread.sleep(100);
-				} catch (Exception e) { }
+//				try {
+//					Thread.sleep(100);
+//				} catch (Exception e) { }
 
 				for (int i = 0; i < NUM_PLAYERS; i++) {
 					players[i].defaultAnimation();

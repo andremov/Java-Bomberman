@@ -32,16 +32,10 @@ public class Client implements Runnable {
 	}
 	
 	public void host() {
+		Handler.server = new Server();
 		connect("localhost");
-		if (socket == null) {
-			Handler.server = new Server();
-			Handler.clientChanges = new String[4];
-			for (int i = 0; i < Handler.clientChanges.length; i++) {
-				Handler.clientChanges[i] = "";
-			}
-			connect("localhost");
-			new Thread(Handler.server).start();
-		}
+		new Thread(Handler.server).start();
+		Handler.currentScene = new scenes.Lobby(Handler.server.getAddress(), Handler.server.wins, Handler.server.rounds);
 	}
 	
 	public void connect(String serverAddress) {
@@ -59,12 +53,10 @@ public class Client implements Runnable {
 			out = new PrintWriter(socket.getOutputStream(), true);
 			
 			String infoReceived = in.readLine();
-			Handler.playerID = Integer.parseInt(infoReceived.split(";")[0]);
-			Handler.address = infoReceived.split(";")[1];
+			Handler.setReal(infoReceived);
 			
 			System.out.println("Connected successfully.");
 			
-			Handler.currentScene = new scenes.Lobby();
 			new Thread(this).start();
 		} catch (Exception e2) {
 			socket = null;
@@ -76,6 +68,8 @@ public class Client implements Runnable {
 	}
 	
 	public void disconnect() {
+		Handler.players = null;
+		Handler.initPlayers();
 		socket = null;
 		in = null;
 		out = null;
@@ -87,7 +81,7 @@ public class Client implements Runnable {
 		while (socket != null && Handler.server == null) {
 			try {
 				String changesFromServer = in.readLine();
-				Handler.applyChanges(changesFromServer);
+				Handler.clientReceiveChanges(changesFromServer);
 				
 				timeOuts = 0;
 			} catch (Exception e1) {
@@ -98,8 +92,9 @@ public class Client implements Runnable {
 					disconnect();
 				}
 			}
+			
 			try {
-				String changesToServer = Handler.getChanges();
+				String changesToServer = Handler.clientSendChanges();
 				out.println(changesToServer);
 			} catch (Exception e2) { }
 				

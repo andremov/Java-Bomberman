@@ -20,9 +20,9 @@ import model.Handler;
  * @author Andres
  */
 public abstract class Scene {
-
+	
 	public static int CODE_INVALID = -1000;
-
+	
 	private final String name;
 	private final boolean full;
 
@@ -30,6 +30,10 @@ public abstract class Scene {
 		this.name = name;
 		this.full = full;
 	}
+	
+	public abstract int getID();
+	
+	public abstract String sceneInit();
 
 	public abstract void receiveKeyAction(int actionCode);
 

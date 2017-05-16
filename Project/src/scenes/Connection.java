@@ -16,6 +16,8 @@ import java.io.IOException;
  * @author Andres
  */
 public class Connection extends Scene {
+
+	public static final int SCENE_ID = 0;
 	
 	public static int CODE_DEL = -1;
 	// NUMBERS FROM 0 TO 9 RESERVED
@@ -36,6 +38,16 @@ public class Connection extends Scene {
 		this.selectedAction = 0;
 		this.serverAddress = "";
 		this.currentMsg = MSG_ENTER;
+	}
+	
+	@Override
+	public int getID() {
+		return SCENE_ID;
+	}
+	
+	@Override
+	public String sceneInit() {
+		return SCENE_ID+"";
 	}
 	
 	@Override

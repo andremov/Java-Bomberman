@@ -23,9 +23,12 @@ public abstract class NIC {
 	private static BufferedImage bombs;
 	private static BufferedImage explosion;
 	private static BufferedImage[] playerSprites;
+	public static BufferedImage star;
+	public static BufferedImage cross;
+	public static BufferedImage check;
+	
 
 	public static int[][] mapTemplate;
-	public static int SIZE_MAP = 15;
 		
 	public static void loadAllData() {
 		
@@ -47,7 +50,7 @@ public abstract class NIC {
 
 		File archivo = new File("db/map.txt");
 		readInfoQ = java.nio.file.Files.readAllLines(archivo.toPath());
-		mapTemplate = new int[SIZE_MAP][SIZE_MAP];
+		mapTemplate = new int[bomberman.Bomberman.SIZE_MAP][bomberman.Bomberman.SIZE_MAP];
 		for (int i = 0; i < readInfoQ.size(); i++) {
 			String[] columns = readInfoQ.get(i).split(",");
 			for (int j = 0; j < columns.length; j++) {
@@ -63,13 +66,15 @@ public abstract class NIC {
 		bombs = ImageIO.read(new File("assets/bombsprite.png"));
 		explosion = ImageIO.read(new File("assets/explodesprite.png"));
 		
-		int playerSpriteSheets = 5;
+		check = ImageIO.read(new File("assets/check.png"));
+		cross = ImageIO.read(new File("assets/cross.png"));
+		star = ImageIO.read(new File("assets/star.png"));
+		
+		int playerSpriteSheets = 6;
 		playerSprites = new BufferedImage[playerSpriteSheets];
 		for (int i = 0; i < playerSpriteSheets; i++) {
 			playerSprites[i] = ImageIO.read(new File("assets/player"+i+".png"));
 		}
-		
-		
 	}
 	
 	public static BufferedImage getBombFrame(int index) {

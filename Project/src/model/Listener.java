@@ -33,8 +33,10 @@ public class Listener implements Runnable {
 	}
 	
 	public void listen() {
-		listening = true;
-		new Thread(this).start();
+		if (!listening) {
+			listening = true;
+			new Thread(this).start();
+		}
 	}
 	
 	private void sendSocket(Socket connection) {

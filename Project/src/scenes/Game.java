@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package model;
+package scenes;
 
 import control.KeyHandler;
 import java.awt.Graphics;
@@ -14,13 +14,15 @@ import model.Coordinate;
 import model.Handler;
 import model.Map;
 import model.Player;
-import scenes.Scene;
+import model.Tile;
 
 /**
  *
  * @author Andres
  */
 public class Game extends Scene {
+
+	public static final int SCENE_ID = 2;
 	
 	public static final int COLLISION_NONE = 0;
 	public static final int COLLISION_WALL = 1;
@@ -30,71 +32,116 @@ public class Game extends Scene {
 
 	private static final int BOMB_TIMER = 50;
 	
-	private ArrayList<Bomb> activeBombs;
+	private Bomb[] activeBombs;
+	private int numBombs;
 	private double globalTick;
 	Map gameMap;
-	private String changes;
 	
 	public Game() {
 		super("Game", true);
 		this.globalTick = 0;
-		activeBombs = new ArrayList<>();
+		activeBombs = new Bomb[100];
+		numBombs = 0;
 		gameMap = new Map();
 		
-		for (int i = 0; i < Handler.players.length; i++) {
+		int tileDiff = 12;
+		int x = 1 + (Handler.playerID%2)*tileDiff;
+		int y = 1 + ((int)Math.floor(Handler.playerID/2))*tileDiff;
+		Coordinate tileCd = new Coordinate(x,y,Coordinate.TYPE_TILE);
+		Handler.getPlayer().init(tileCd);
+		
+		for (int i = 0; i < Handler.NUM_PLAYERS; i++) {
 			if (Handler.players[i].isEnabled()) {
-				int tileDiff = 12;
-				int x = 1 + (i%2)*tileDiff;
-				int y = 1 + ((int)Math.floor(i/2))*tileDiff;
-				Coordinate tileCd = new Coordinate(x,y,Coordinate.TYPE_TILE);
-				Handler.players[i].init(tileCd);
+				Handler.players[i].setAlive(true);
 			}
 		}
 	}
-
-	public String getChanges() {
-		String temp = changes;
-		changes = "";
-		return temp;
-	}
 	
-	private void addChange(int x, int y) {
-		if (changes.isEmpty()) {
-			changes = "MAP!";
+	public void init(String mapString) {
+		for (int i = 0; i < mapString.split(",").length; i++) {
+			int x = i%bomberman.Bomberman.SIZE_MAP;
+			int y =(int)Math.floor(i/bomberman.Bomberman.SIZE_MAP);
+			gameMap.getTile(x, y).setObject(Integer.parseInt(mapString.split(",")[i]));
 		}
-		changes = changes + x+","+y+"="+gameMap.getTile(x, y).getObject()+";";
 	}
 	
-	private void removeChange(int x, int y) {
+	@Override
+	public int getID() {
+		return SCENE_ID;
+	}
+	
+	@Override
+	public String sceneInit() {
+		String mapString = "";
+		for (int x = 0; x < bomberman.Bomberman.SIZE_MAP; x++) {
+			for (int y = 0; y < bomberman.Bomberman.SIZE_MAP; y++) {
+				mapString = mapString + gameMap.getTile(y, x).getObject() + ",";
+			}
+		}
+		return SCENE_ID+":"+mapString;
+	}
+	
+	public void applyMapChanges(String changes) {
+		if (!changes.isEmpty()) {
+			for (int i = 0; i < changes.split(";").length; i++) {
+				String change = changes.split(";")[i];
+				int x = Integer.parseInt(change.split("=")[0].split(",")[0]);
+				int y = Integer.parseInt(change.split("=")[0].split(",")[1]);
+				int obj = Integer.parseInt(change.split("=")[1]);
+				gameMap.getTile(x, y).setObject(obj);
+			}
+		}
+	}
+	
+	public void applyServerMapChanges(String changes) {
+		if (!changes.isEmpty()) {
+			for (int i = 0; i < changes.split(";").length; i++) {
+				String change = changes.split(";")[i];
+				int x = Integer.parseInt(change.split("=")[0].split(",")[0]);
+				int y = Integer.parseInt(change.split("=")[0].split(",")[1]);
+				int obj = Integer.parseInt(change.split("=")[1]);
+				gameMap.getTile(x, y).setObject(obj);
+				sendChange(x, y);
+			}
+		}
+	}
+	
+	private void sendChange(int x, int y) {
 		String change = x+","+y+"="+gameMap.getTile(x, y).getObject()+";";
-		if (changes.contains(change)) {
-			changes.replace(change, "");
-		}
+		Handler.addMapChange(change);
 	}
 	
-	public void applyChanges(String changes) {
-		for (int i = 0; i < changes.split(";").length; i++) {
-			String thisChange = changes.split(";")[i];
-			int x = Integer.parseInt(thisChange.split("=")[0].split(",")[0]);
-			int y = Integer.parseInt(thisChange.split("=")[0].split(",")[1]);
-			int state = Integer.parseInt(thisChange.split("=")[1]);
-			gameMap.getTile(x, y).setObject(state);
-			removeChange(x,y);
+	private void clearBombs() {
+		for (int i = 0; i < numBombs; i++) {
+			activeBombs[i] = null;
 		}
+		numBombs = 0;
+	}
+	
+	private void addBomb(Bomb newBomb) {
+		activeBombs[numBombs] = newBomb;
+		numBombs++;
+	}
+	
+	private void removeBomb(int index) {
+		for (int i = 0; i < numBombs; i++) {
+			activeBombs[i] = activeBombs[i+1];
+		}
+		numBombs--;
 	}
 	
 	public void start() {
 		this.globalTick = 0;
 		gameMap = new Map();
-		activeBombs.clear();
+		clearBombs();
 
-		for (int i = 0; i < Handler.players.length; i++) {
+		for (int i = 0; i < Handler.NUM_PLAYERS; i++) {
 			if (Handler.players[i].isEnabled()) {
 				int tileDiff = 12;
 				int x = 1 + (i%2)*tileDiff;
 				int y = 1 + ((int)Math.floor(i/2))*tileDiff;
 				Coordinate tileCd = new Coordinate(x,y,Coordinate.TYPE_TILE);
-				Handler.players[i].init(tileCd);
+				((model.RealPlayer)Handler.players[i]).init(tileCd);
 			}
 		}
 	}
@@ -108,46 +155,47 @@ public class Game extends Scene {
 	}
 	
 	public int powerTileCheck(int tileX, int tileY) {
-		return gameMap.getTile(tileX, tileY).takePowerup();
+		int powerup = gameMap.getTile(tileX, tileY).takePowerup();
+		sendChange(tileX,tileY);
+		return powerup;
 	}
         
 	@Override
 	public void receiveKeyAction(int actionCode) {
-		int player = (int)Math.floor(actionCode/16);
 		int state = actionCode%2;
-		int action = actionCode-(player*16)-state;
+		int action = actionCode-state;
 		
 		if (action == KeyHandler.ACTION_A && state == KeyHandler.MOD_RELEASE) {
 			// BOMB
-			if (Handler.players[player].plantBomb()) {
+			if (Handler.getPlayer().plantBomb()) {
                 
-				plantBomb(Handler.players[player]);
+				plantBomb(Handler.getPlayer());
 			}
 		} else {
 			//MOVEMENT
-			Handler.players[player].receiveAction(action+state);
+			Handler.getPlayer().receiveAction(action+state);
 		}
 	}
 
-	private void plantBomb(Player owner){
-		activeBombs.add(new Bomb(owner, (int)(this.globalTick+BOMB_TIMER)));
+	private void plantBomb(model.RealPlayer owner){
+		addBomb(new Bomb(owner, (int)(this.globalTick+BOMB_TIMER)));
 		if (gameMap.getTile(owner.getTileX(),owner.getTileY()).isBoom()) {
-			explode(activeBombs.size()-1);
+			explode(numBombs-1);
 		} else {
 			gameMap.getTile(owner.getTileX(),owner.getTileY()).setObject(Tile.OBJECT_BOMB);
-			addChange(owner.getTileX(),owner.getTileY());
+			sendChange(owner.getTileX(),owner.getTileY());
 		}
 	}
 	
-	private void explode(int indice) {
-		int startX = activeBombs.get(indice).xTile;
-		int startY = activeBombs.get(indice).yTile;
-		activeBombs.get(indice).owner.setBombsLeft(activeBombs.get(indice).owner.getBombsLeft()+1);
-		int max = activeBombs.get(indice).firePower;
-		activeBombs.remove(indice);
+	private void explode(int index) {
+		int startX = activeBombs[index].xTile;
+		int startY = activeBombs[index].yTile;
+		activeBombs[index].owner.setBombsLeft(activeBombs[index].owner.getBombsLeft()+1);
+		int max = activeBombs[index].firePower;
+		removeBomb(index);
 		
 		gameMap.getTile(startX,startY).setBoom(0,0);
-		addChange(startX,startY);
+		sendChange(startX,startY);
 		
 		flare(max,startX,startY,1,0);
 		flare(max,startX,startY,-1,0);
@@ -162,8 +210,8 @@ public class Game extends Scene {
 					gameMap.getTile(tileX+deltaX,tileY+deltaY).destroyWall();
 				}
 			} else if (gameMap.getTile(tileX+deltaX,tileY+deltaY).isBomb()) {
-				for (int i = 0; i < activeBombs.size(); i++) {
-					if (tileX+deltaX == activeBombs.get(i).xTile && tileY+deltaY == activeBombs.get(i).yTile){
+				for (int i = 0; i < numBombs; i++) {
+					if (tileX+deltaX == activeBombs[i].xTile && tileY+deltaY == activeBombs[i].yTile){
 						explode(i);
 					}
 				}
@@ -181,24 +229,24 @@ public class Game extends Scene {
 //				gameMap.getTile(tileX+deltaX,tileY+deltaY).setObject(type);
 				flare(fire-1,tileX+deltaX,tileY+deltaY,deltaX,deltaY);
 			}
-			addChange(tileX+deltaX,tileY+deltaY);
+			sendChange(tileX+deltaX,tileY+deltaY);
 		}
 	}
 
 	@Override
 	public BufferedImage getDisplay() throws IOException {
-		int mapSize = bomberman.Bomberman.TILE_SIZE*data.NIC.SIZE_MAP;
+		int mapSize = bomberman.Bomberman.TILE_SIZE*bomberman.Bomberman.SIZE_MAP;
 		BufferedImage image = new BufferedImage(mapSize, mapSize, BufferedImage.TYPE_INT_ARGB);
 		Graphics g = image.getGraphics();
 		
 		this.globalTick++;
-		while (!activeBombs.isEmpty() && activeBombs.get(0).explodeTick <= globalTick) {
+		while (numBombs > 0 && activeBombs[0].explodeTick <= globalTick) {
 			explode(0);
 		}
 		
 		g.drawImage(gameMap.getDisplay(), 0, 0, mapSize, mapSize, null);
 		
-		for (int i = 0; i < Handler.players.length; i++) {
+		for (int i = 0; i < Handler.NUM_PLAYERS; i++) {
 			if (Handler.players[i].isEnabled() && Handler.players[i].isAlive()) {
 				Player thisPlayer = Handler.players[i];
 				g.drawImage(thisPlayer.getDisplay(),thisPlayer.getImageX(),thisPlayer.getImageY(),null);
@@ -213,9 +261,9 @@ public class Game extends Scene {
 		int explodeTick;
 		int xTile;
 		int yTile;
-		Player owner;
+		model.RealPlayer owner;
 		
-		public Bomb(Player owner, int explodeTick) {
+		public Bomb(model.RealPlayer owner, int explodeTick) {
 			this.firePower = owner.getFirePower();
 			this.explodeTick = explodeTick;
 			this.xTile = owner.getTileX();

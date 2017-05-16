@@ -29,17 +29,15 @@ public class Display extends Canvas implements Runnable {
 	public void run() {
 		createBufferStrategy(2);
 		while (true){
-            Graphics g = getBufferStrategy().getDrawGraphics();
 			
 			try {
+				Graphics g = getBufferStrategy().getDrawGraphics();
 				lastFrame = model.Handler.getDisplay();
+				g.drawImage (lastFrame,0,0,getWidth(),getHeight(),null);
+				getBufferStrategy().show();
 			}catch(Exception e) {
-				System.err.println("Error display.");
+//				System.err.println("Error display.");
 			}
-			
-			g.drawImage (lastFrame,0,0,getWidth(),getHeight(),null);
-                        
-			getBufferStrategy().show();
 			
 			try {
 				Thread.sleep(50);

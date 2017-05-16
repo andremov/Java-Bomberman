@@ -14,6 +14,7 @@ public class Bomberman {
     public static int PORT = 7100;
 	public static final int SCREEN_SIZE = 600;
 	public static final int TILE_SIZE = 16;
+	public static int SIZE_MAP = 15;
 
 	/**
 	 * @param args the command line arguments

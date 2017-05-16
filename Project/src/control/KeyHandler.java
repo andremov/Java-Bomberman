@@ -49,7 +49,7 @@ public class KeyHandler extends KeyAdapter {
 		} else if (key.getKeyCode() == KeyEvent.VK_D) {
 			acceptedKey = true;
 			actionMod = ACTION_RIGHT;
-		} else if (key.getKeyCode() == KeyEvent.VK_NUMPAD3) {
+		} else if (key.getKeyCode() == KeyEvent.VK_F) {
 			acceptedKey = true;
 			actionMod = ACTION_A;
 //		} else if (key.getKeyCode() == KeyEvent.VK_ESCAPE) {

@@ -28,10 +28,16 @@ public class Listener implements Runnable {
 		this.listen();
 	}
 	
+	/**
+	 * Stops listener thread.
+	 */
 	public void stopListening() {
 		listening = false;
 	}
 	
+	/**
+	 * Starts listener thread.
+	 */
 	public void listen() {
 		if (!listening) {
 			listening = true;
@@ -39,10 +45,18 @@ public class Listener implements Runnable {
 		}
 	}
 	
+	/**
+	 * Sends socket to server.
+	 * @param connection 
+	 */
 	private void sendSocket(Socket connection) {
 		owner.newConnection(connection);
 	}
 
+	/**
+	 * Listener thread.
+	 * Checks for 100ms for a connection, if succeeds, sends socket, if fails, tries again.
+	 */
 	@Override
 	public void run() {
 		while(listening) {

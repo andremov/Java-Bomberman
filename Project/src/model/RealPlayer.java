@@ -15,7 +15,7 @@ import java.awt.image.BufferedImage;
  */
 public class RealPlayer extends Player {
 	
-	private static final int COLLIDER_SIZE = 6;
+	private static final int COLLIDER_SIZE = 5;
 	private static final int MOVE_PX = 3;
 	
 	private int firePower;
@@ -30,6 +30,10 @@ public class RealPlayer extends Player {
 		this.cantCollideWith = null;
 	}
 	
+	/**
+	 * Give this player the default values.
+	 * @param cd 
+	 */
 	public void init(Coordinate cd) {
 		this.firePower = 2;
 		this.bombsLeft = 1;
@@ -40,6 +44,10 @@ public class RealPlayer extends Player {
 		defaultAnimation();
 	}
 	
+	/**
+	 * Checks collisions, moves the player, advances the animation.
+	 * All processes needed per system 'tick'.
+	 */
 	private void tick() {
 		boolean[] collisions = new boolean[6];
 		for (int i = 0; i < collisions.length; i++) {
@@ -181,6 +189,10 @@ public class RealPlayer extends Player {
 		
 	}
 
+	/**
+	 * Gets the image representation of this player.
+	 * @return 
+	 */
 	@Override
 	public BufferedImage getDisplay() {
 		BufferedImage image = new BufferedImage(16, 25, BufferedImage.TYPE_INT_ARGB);
@@ -197,7 +209,12 @@ public class RealPlayer extends Player {
 		
 		return image;
 	}
-        
+	
+	/**
+	 * If the player can plant a bomb, reduces the bombs left, and returns true.
+	 * Else, returns false.
+	 * @return 
+	 */
 	public boolean plantBomb() {
 		boolean canPlant = this.bombsLeft > 0;
 		if (canPlant) {
@@ -206,7 +223,10 @@ public class RealPlayer extends Player {
 		}
 		return canPlant;
 	}
-        
+	
+    /**
+	 * Makes sure the player animation is the proper one.
+	 */
 	private void checkAnim() {
 		this.setMoving(true);
 		if (yDelta < 0) {
@@ -228,6 +248,9 @@ public class RealPlayer extends Player {
 		}
 	}
 	
+	/**
+	 * Receives an action code, and responds accordingly.
+	 */
 	public void receiveAction(int actionCode) {
 		int stateCode = actionCode%2;
 		int directionCode = actionCode - stateCode;

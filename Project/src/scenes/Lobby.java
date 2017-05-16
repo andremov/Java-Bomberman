@@ -37,13 +37,24 @@ public class Lobby extends Scene {
 		for (int i = 0; i < ready.length; i++) {
 			ready[i] = false;
 		}
+		for (int i = 0; i < Handler.NUM_PLAYERS; i++) {
+			Handler.players[i].defaultAnimation();
+		}
 	}
 	
+	/**
+	 * Returns the scene ID.
+	 * @return 
+	 */
 	@Override
 	public int getID() {
 		return SCENE_ID;
 	}
 
+	/**
+	 * Returns the string of information for clients to create this scene.
+	 * @return 
+	 */
 	@Override
 	public String sceneInit() {
 		String winString = "";
@@ -53,11 +64,19 @@ public class Lobby extends Scene {
 		return SCENE_ID+":"+serverAddress+";"+winString+";"+roundsPlayed+";";
 	}
 
+	/**
+	 * Sets the given index ready value to the given value.
+	 * @param index
+	 * @param value 
+	 */
 	public void setReady(int index, boolean value) {
 		ready[index] = value;
 		checkReady();
 	}
 	
+	/**
+	 * Checks if all players are ready, starts the game.
+	 */
 	private void checkReady() {
 		boolean go = true;
 		for (int i = 0; i < ready.length; i++) {
@@ -71,19 +90,35 @@ public class Lobby extends Scene {
 		}
 	}
 	
+	/**
+	 * Returns the ready status of the given index.
+	 * @param index
+	 * @return 
+	 */
 	public boolean getReady(int index) {
 		return ready[index];
 	}
 	
+	/**
+	 * Receives an action code, and responds accordingly.
+	 * @param actionCode 
+	 */
 	@Override
 	public void receiveKeyAction(int actionCode) {
 		if (actionCode == CODE_SWITCH) {
-			Handler.players[Handler.playerID].setColor(Handler.nextColor(Handler.players[Handler.playerID].getColor()));
+			if (!ready[Handler.playerID]) {
+				Handler.players[Handler.playerID].setColor(Handler.nextColor(Handler.players[Handler.playerID].getColor()));
+			}
 		} else if (actionCode == CODE_ENTER) {
 			setReady(Handler.playerID, !ready[Handler.playerID]);
 		}
 	}
-
+	
+	/**
+	 * Return scene display.
+	 * @return
+	 * @throws IOException 
+	 */
 	@Override
 	public BufferedImage getDisplay() throws IOException {
 		int size = bomberman.Bomberman.SCREEN_SIZE;
@@ -149,6 +184,31 @@ public class Lobby extends Scene {
 				img = data.NIC.check;
 			}
 			g.drawImage(img, startX+section-(img.getWidth()/8), y+200, (img.getWidth()/4),(img.getHeight()/4),null);
+		}
+		
+		// INSTRUCTIONS
+		font = new Font("Arial",Font.PLAIN,16);
+		g.setFont(font);
+		metrics = g.getFontMetrics(font);
+		s = "Presione las flechas direccionales para cambiar de color, y la tecla"
+				+ " 'Enter' para marcarse como 'Listo'.";
+		int maxLineWidth = 490;
+		int max = (int) Math.ceil(metrics.stringWidth(s)/maxLineWidth);
+		int startIndex = 0;
+		int endIndex = 0;
+
+		for (int i = 0; i < max+1; i++) {
+			String line = s.substring(startIndex,endIndex);
+			while (metrics.stringWidth(line) < maxLineWidth && endIndex < s.length()) {
+				endIndex = endIndex+1;
+				line = s.substring(startIndex, endIndex);
+			}
+			line = s.substring(startIndex, endIndex);
+
+			fontX = (size - metrics.stringWidth(line)) / 2;
+
+			g.drawString(line, fontX, 560+(20*i));
+			startIndex = endIndex;
 		}
 		
 		return image;

@@ -54,10 +54,18 @@ public class Tile {
 		}
 	}
         
+	/**
+	 * Returns true if this tile is a solid or non solid wall.
+	 * @return 
+	 */
 	public boolean isSolid() {
 		return this.object == OBJECT_BLOCK || this.isBreakable();
 	}
 	
+	/**
+	 * Returns power up code, removes power up.
+	 * @return 
+	 */
 	public int takePowerup() {
 		int p = 0;
 		if (isPowerup()) {
@@ -71,26 +79,49 @@ public class Tile {
 		return p;
 	}
 
+	/**
+	 * Returns true if this tile contains a power up.
+	 * @return 
+	 */
 	public boolean isPowerup() {
 		return this.object == OBJECT_POWERUP_BOMB || this.object == OBJECT_POWERUP_FIRE;
 	}
         
+	/**
+	 * Returns true if this tile is breakable.
+	 * @return 
+	 */
 	public boolean isBreakable() {
 		return this.object == OBJECT_WALL;
 	}
 	
+	/**
+	 * Returns true if this tile is empty.
+	 * @return 
+	 */
 	public boolean isEmpty() {
 		return this.object == OBJECT_EMPTY;
 	}
 	
+	/**
+	 * Returns true if this tile is a burn tile.
+	 */
 	public boolean isBoom() {
 		return this.object >= OBJECT_BOOM;
 	}
 	
+	/**
+	 * Returns true if this tile is a bomb.
+	 * @return 
+	 */
 	public boolean isBomb() {
 		return this.object == OBJECT_BOMB;
 	}
 
+	/**
+	 * Returns this tile's image.
+	 * @return 
+	 */
 	public BufferedImage getImage() {
 		int tileSize = bomberman.Bomberman.TILE_SIZE;
 		BufferedImage image = new BufferedImage(tileSize, tileSize, BufferedImage.TYPE_INT_ARGB);
@@ -151,6 +182,9 @@ public class Tile {
 		return image;
 	}
         
+	/**
+	 * Destroys wall, rolls for power up.
+	 */
 	public void destroyWall() {
 		if (this.isBreakable()) {
 			int random = (int)(Math.ceil(Math.random()*10));
@@ -173,10 +207,19 @@ public class Tile {
 		this.delta = 1;
 	}
 
+	/**
+	 * Returns the object.
+	 * @return 
+	 */
 	public int getObject() {
 		return object;
 	}
 	
+	/**
+	 * Sets as burn tile.
+	 * @param x
+	 * @param y 
+	 */
 	public void setBoom(int x, int y) {
 		int type = OBJECT_BOOM;
 		

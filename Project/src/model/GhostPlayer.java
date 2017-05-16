@@ -18,8 +18,10 @@ public class GhostPlayer extends Player {
 		super();
 	}
 	
-	
-	
+	/**
+	 * Gets the image representation of this player.
+	 * @return 
+	 */
 	@Override
 	public BufferedImage getDisplay() {
 		BufferedImage image = new BufferedImage(16, 25, BufferedImage.TYPE_INT_ARGB);

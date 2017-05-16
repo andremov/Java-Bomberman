@@ -26,6 +26,10 @@ public class Map {
 		}
 	}
 	
+	/**
+	 * Returns display image for this map.
+	 * @return 
+	 */
 	public BufferedImage getDisplay() {
 		int mapSize = bomberman.Bomberman.TILE_SIZE*bomberman.Bomberman.SIZE_MAP;
 		BufferedImage image = new BufferedImage(mapSize, mapSize, BufferedImage.TYPE_INT_ARGB);

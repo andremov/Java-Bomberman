@@ -9,7 +9,6 @@ import control.KeyHandler;
 import java.awt.Canvas;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import model.Client;
 
 /**
  *
@@ -24,7 +23,10 @@ public class Display extends Canvas implements Runnable {
 		lastFrame = new BufferedImage(size, size,BufferedImage.TYPE_INT_ARGB);
 		addKeyListener(new KeyHandler());
 	}
-
+	
+	/**
+	 * Displays the current scene image;
+	 */
 	@Override
 	public void run() {
 		createBufferStrategy(2);
@@ -44,7 +46,5 @@ public class Display extends Canvas implements Runnable {
 			} catch (Exception e) { }
 		}
 	}
-	
-	
 	
 }

@@ -28,14 +28,20 @@ public class Handler {
 	public static Server server;
 	public static Client client;
 	public static int playerID;
-	public static String pendingChanges;
+	public static String pendingMapChanges;
+	public static String pendingSoundEffects;
 	
 	public Handler() {
 		client = new Client();
 		currentScene = (new scenes.Connection());
-		pendingChanges = "";
+		pendingMapChanges = "";
 	}
 	
+	/**
+	 * Returns the current scene display.
+	 * @return
+	 * @throws IOException 
+	 */
 	public static BufferedImage getDisplay() throws IOException {
 		int size = bomberman.Bomberman.SCREEN_SIZE;
 		BufferedImage img = new BufferedImage(size,size,BufferedImage.TYPE_INT_ARGB);
@@ -43,6 +49,10 @@ public class Handler {
 		return img;
 	}
 	
+	/**
+	 * Returns the current scene cast as Game.
+	 * @return 
+	 */
 	public static scenes.Game getGame() {
 		scenes.Game g = null;
 		if (currentScene instanceof scenes.Game) {
@@ -51,6 +61,11 @@ public class Handler {
 		return g;
 	}
 	
+	/**
+	 * Starts game.
+	 * @param wins
+	 * @param rounds 
+	 */
 	public static void engageGame(int[] wins, int rounds) {
 		if (server != null) {
 			server.wins = wins;
@@ -59,7 +74,45 @@ public class Handler {
 		}
 	}
 	
+	/**
+	 * Checks if game has ended.
+	 * If no player is alive, goes to lobby.
+	 * If one player is alive, gives that player a win, and goes to lobby.
+	 */
+	private static void checkGameWin() {
+		int numActivePlayers = 0;
+		for (int i = 0; i < players.length; i++) {
+			if (players[i].isAlive() && players[i].isEnabled()) {
+				numActivePlayers++;
+			}
+		}
+		if (numActivePlayers == 1) {
+			int index = 0;
+			while (!players[index].isAlive() || !players[index].isEnabled()) {
+				index++;
+			}
+			server.wins[index] = server.wins[index] + 1;
+			server.rounds = server.rounds+1;
+			
+			try {
+				Thread.sleep(100);
+			} catch (Exception e) { }
+			
+			currentScene = new Lobby(server.getAddress(), server.wins, server.rounds);
+		} else if (numActivePlayers == 0) {
+			
+			try {
+				Thread.sleep(100);
+			} catch (Exception e) { }
+			
+			currentScene = new Lobby(server.getAddress(), server.wins, server.rounds);
+		}
+	}
+	
 	// PLAYERS
+	/**
+	 * Initializes all players as ghost players.
+	 */
 	public static void initPlayers() {
 		if (players == null) {
 			players = new Player[4];
@@ -70,6 +123,11 @@ public class Handler {
 		}
 	}
 	
+	/**
+	 * Adds a player to the server.
+	 * @param socket
+	 * @return 
+	 */
 	public static String addPlayer(java.net.Socket socket) {
 		int index = firstAvailableIndex();
 		int color = nextColor(1);
@@ -80,6 +138,10 @@ public class Handler {
 		return index+","+color;
 	}
 	
+	/**
+	 * Sets the given player to a real player.
+	 * @param info 
+	 */
 	public static void setReal(String info) {
 		int index = Integer.parseInt(info.split(",")[0]);
 		int color = Integer.parseInt(info.split(",")[1]);
@@ -90,22 +152,38 @@ public class Handler {
 //		System.out.println("Player "+index+" is real player.");
 	}
 	
+	/**
+	 * Sets the given index to a ghost player.
+	 * @param index 
+	 */
 	public static void setGhost(int index) {
 		players[index] = new GhostPlayer();
 //		System.out.println("Player "+index+"is now ghost.");
 	}
 	
+	/**
+	 * Returns this client's real player.
+	 * @return 
+	 */
 	public static RealPlayer getPlayer() {
 		return (RealPlayer) players[playerID];
 	}
 	
 	// CHANGES
+	/**
+	 * Adds a change to the pending changes.
+	 * @param change 
+	 */
 	public static void addMapChange(String change) {
-		if (!pendingChanges.contains("?")) {
-			pendingChanges = pendingChanges + change;
+		if (!pendingMapChanges.contains("?")) {
+			pendingMapChanges = pendingMapChanges + change;
 		}
 	}
 	
+	/**
+	 * Method called when a client receives changes from a server.
+	 * @param changes 
+	 */
 	public static void clientReceiveChanges(String changes) {
 		if (changes.contains("!")) {
 			int newScene = Integer.parseInt(changes.split(":")[0].split("!")[1]);
@@ -123,7 +201,7 @@ public class Handler {
 		} else {
 			int sceneID = Integer.parseInt(changes.split(":")[0]);
 			if (sceneID != currentScene.getID()) {
-				pendingChanges = "?";
+				pendingMapChanges = "?";
 			} else {
 				String sceneChanges = changes.split(":")[1];
 				if (currentScene instanceof Lobby) {
@@ -168,9 +246,13 @@ public class Handler {
 		}
 	}
 	
+	/**
+	 * Returns this client's changes.
+	 * @return 
+	 */
 	public static String clientSendChanges() {
-		String changes = pendingChanges;
-		pendingChanges = "";
+		String changes = pendingMapChanges;
+		pendingMapChanges = "";
 		
 		if (!changes.contains("?")) {
 			if (currentScene instanceof Lobby) {
@@ -195,6 +277,10 @@ public class Handler {
 		return changes;
 	}
 	
+	/**
+	 * Method called after the server has received all client changes.
+	 * @param changes 
+	 */
 	public static void serverReceiveChanges(String[] changes) {
 		
 		if (currentScene instanceof Lobby) {
@@ -237,24 +323,10 @@ public class Handler {
 		}
 	}
 	
-	private static void checkGameWin() {
-		int numActivePlayers = 0;
-		for (int i = 0; i < players.length; i++) {
-			if (players[i].isAlive() && players[i].isEnabled()) {
-				numActivePlayers++;
-			}
-		}
-		if (numActivePlayers == 1) {
-			int index = 0;
-			while (!players[index].isAlive() || !players[index].isEnabled()) {
-				index++;
-			}
-			server.wins[index] = server.wins[index] + 1;
-			server.rounds = server.rounds+1;
-			currentScene = new Lobby(server.getAddress(), server.wins, server.rounds);
-		}
-	}
-	
+	/**
+	 * Returns the server's changes.
+	 * @return 
+	 */
 	public static String serverSendChanges() {
 		String changes = currentScene.getID()+":";
 		
@@ -269,8 +341,8 @@ public class Handler {
 				
 			}
 		} else if (currentScene instanceof Game) {
-			changes = changes + pendingChanges;
-			pendingChanges = "";
+			changes = changes + pendingMapChanges;
+			pendingMapChanges = "";
 			changes = changes + "#";
 			for (int i = 0; i < NUM_PLAYERS; i++) {
 				String player;
@@ -294,6 +366,10 @@ public class Handler {
 	
 	
 	// INPUTS
+	/**
+	 * Receives a KeyEvent, parses it, and sends it to the non-game current scene.
+	 * @param keyCode 
+	 */
 	public static void otherKey(KeyEvent keyCode) {
 		int keyValue = Scene.CODE_INVALID;
 		if (currentScene instanceof Connection) {
@@ -336,6 +412,10 @@ public class Handler {
 		currentScene.receiveKeyAction(keyValue);
 	}
 	
+	/**
+	 * Receives a key action code and responds accordingly.
+	 * @param actionCode 
+	 */
 	public static void receiveKeyAction(int actionCode) {
 		try {
 			if (currentScene instanceof Game) {
@@ -346,6 +426,11 @@ public class Handler {
 	
 	
 	// PLAYER MANAGEMENT
+	/**
+	 * Returns the next available color.
+	 * @param startingColor
+	 * @return 
+	 */
 	public static int nextColor(int startingColor) {
 		int color = startingColor;
 		int searchIndex = 0;
@@ -363,6 +448,10 @@ public class Handler {
 		return color;
 	}
 	
+	/**
+	 * Returns the first available index in the player array.
+	 * @return 
+	 */
 	private static int firstAvailableIndex() {
 		int index = 0;
 		while (index < NUM_PLAYERS && players[index].isEnabled()) {
@@ -371,6 +460,10 @@ public class Handler {
 		return index;
 	}
 	
+	/**
+	 * Returns true if there is still space for a new player.
+	 * @return 
+	 */
 	public static boolean spaceAvailable() {
 		boolean canAdd = false;
 		for (int i = 0; i < NUM_PLAYERS; i++) {

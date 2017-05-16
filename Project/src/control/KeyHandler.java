@@ -31,8 +31,11 @@ public class KeyHandler extends KeyAdapter {
 	public final static int MOD_PRESS = 0;
 	public final static int MOD_RELEASE = 1;
 	
-	public final static int MOD_PLAYER = 16;
-	
+	/**
+	 * Parses the key pressed or released, and sends it to the Handler.
+	 * @param key
+	 * @param state 
+	 */
 	private void parseKey(KeyEvent key, int state) {
 		boolean acceptedKey = false;
 		int actionMod = ACTION_NONE;
@@ -52,8 +55,12 @@ public class KeyHandler extends KeyAdapter {
 		} else if (key.getKeyCode() == KeyEvent.VK_F) {
 			acceptedKey = true;
 			actionMod = ACTION_A;
-//		} else if (key.getKeyCode() == KeyEvent.VK_ESCAPE) {
-//			Handler.getGame().start();
+		} else if (key.getKeyCode() == KeyEvent.VK_ESCAPE) {
+			model.Handler.client.disconnect();
+			if (model.Handler.server != null) {
+				model.Handler.server.stopServer();
+				model.Handler.server = null;
+			}
 		}
 		
 		if (acceptedKey) {
@@ -63,11 +70,21 @@ public class KeyHandler extends KeyAdapter {
 		}
 	}
 	
+	/**
+	 * Overriden KeyAdapter method.
+	 * Fires parseKey.
+	 * @param key 
+	 */
 	@Override
 	public void keyReleased(KeyEvent key) {
 		parseKey(key, MOD_RELEASE);
 	}
 	
+	/**
+	 * Override KeyAdapter method.
+	 * Fires parseKey.
+	 * @param key 
+	 */
 	@Override
 	public void keyPressed(KeyEvent key) {
 		parseKey(key, MOD_PRESS);

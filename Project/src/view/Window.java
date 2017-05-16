@@ -38,6 +38,9 @@ public class Window extends JFrame {
 		setVisible(true);
 	}
 	
+	/**
+	 * Start canvas thread.
+	 */
 	public void startCanvas() {
 		canvasThread.start();
 	}

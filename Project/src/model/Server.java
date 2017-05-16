@@ -37,11 +37,10 @@ public class Server implements Runnable {
 		} catch(Exception e) { }
     }
 	
-	public void addWin(int index) {
-		rounds++;
-		wins[index] = wins[index]++;
-	}
-	
+	/**
+	 * Returns host address.
+	 * @return 
+	 */
 	public static String getAddress() {
 		String a = "0.0.0.0";
 		try {
@@ -50,13 +49,10 @@ public class Server implements Runnable {
 		return a;
 	}
 	
-	public static void dispose() {
-		running = false;
-		try {
-			socket.close();
-		} catch (Exception e) { }
-	}
-	
+	/**
+	 * Listener method to add a player connection to server.
+	 * @param newSocket 
+	 */
 	public void newConnection(Socket newSocket) {
 		try {
 			new java.io.PrintWriter(newSocket.getOutputStream(), true).println(Handler.addPlayer(newSocket));
@@ -66,6 +62,20 @@ public class Server implements Runnable {
 		} catch (Exception e) { }
 	}
 
+	/**
+	 * Mercilessly stops the server.
+	 */
+	public void stopServer() {
+		System.out.println("Stopping server...");
+		running = false;
+		l.stopListening();
+		Handler.initPlayers();
+	}
+	
+	/**
+	 * Server thread.
+	 * Sends message to clients, and receives clients' messages.
+	 */
 	@Override
 	public void run() {
 		while (running) {

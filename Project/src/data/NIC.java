@@ -29,22 +29,24 @@ public abstract class NIC {
 	
 
 	public static int[][] mapTemplate;
-		
+	
+	/**
+	 * General method for loading all data.
+	 */
 	public static void loadAllData() {
-		
 		try {
 			loadImages();
-		} catch (IOException ex) {
-			
-		}
+		} catch (IOException ex) { }
 		
 		try {
 			loadMap();
-		} catch (IOException ex) {
-			
-		}
+		} catch (IOException ex) {}
 	}
 	
+	/**
+	 * Loads the map template from the TXT file.
+	 * @throws IOException 
+	 */
 	private static void loadMap() throws IOException {
 		java.util.List<String> readInfoQ;
 
@@ -59,6 +61,10 @@ public abstract class NIC {
 		}
 	}
 	
+	/**
+	 * Loads all images needed from assets folder, for later use.
+	 * @throws IOException 
+	 */
 	private static void loadImages() throws IOException {
 		
 		tiles = ImageIO.read(new File("assets/tiles.png"));
@@ -77,18 +83,40 @@ public abstract class NIC {
 		}
 	}
 	
+	/**
+	 * Returns a given frame of the bomb sprite.
+	 * @param index
+	 * @return 
+	 */
 	public static BufferedImage getBombFrame(int index) {
 		return bombs.getSubimage(index*16, 0, 16, 16);
 	}
 	
+	/**
+	 * Returns a given frame of a given power up from the power up sprites.
+	 * @param powerIndex
+	 * @param frameIndex
+	 * @return 
+	 */
 	public static BufferedImage getPowerupFrame(int powerIndex, int frameIndex) {
 		return powerups.getSubimage(powerIndex*16, frameIndex*16, 16, 16);
 	}
 	
+	/**
+	 * Returns a given tile type from the tiles sheet.
+	 * @param index
+	 * @return 
+	 */
 	public static BufferedImage getTile(int index) {
 		return tiles.getSubimage(index*16, 0, 16, 16);
 	}
 	
+	/**
+	 * Returns a given frame from a type of explosion sprite.
+	 * @param frameIndex
+	 * @param type
+	 * @return 
+	 */
 	public static BufferedImage getExplosionFrame(int frameIndex, int type) {
 		int random = (int)(Math.ceil(Math.random()*4));
 		int frameDisplace = frameIndex*4*16;
@@ -97,6 +125,13 @@ public abstract class NIC {
 		return explosion.getSubimage(frameDisplace+frameX, frameY, 16, 16);
 	}
 	
+	/**
+	 * Returns a given frame of a given animation of a given color of the player sprites.
+	 * @param playerColor
+	 * @param anim
+	 * @param frame
+	 * @return 
+	 */
 	public static BufferedImage getPlayerFrame(int playerColor, int anim, int frame) {
 		BufferedImage thisSheet;
 		thisSheet = playerSprites[playerColor];

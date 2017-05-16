@@ -31,6 +31,9 @@ public class Client implements Runnable {
 		gameWindow.startCanvas();
 	}
 	
+	/**
+	 * Creates a server, and connects to it.
+	 */
 	public void host() {
 		Handler.server = new Server();
 		connect("localhost");
@@ -38,6 +41,10 @@ public class Client implements Runnable {
 		Handler.currentScene = new scenes.Lobby(Handler.server.getAddress(), Handler.server.wins, Handler.server.rounds);
 	}
 	
+	/**
+	 * Connects to server associated with given server address.
+	 * @param serverAddress 
+	 */
 	public void connect(String serverAddress) {
 		((scenes.Connection) model.Handler.currentScene).setMessage(scenes.Connection.MSG_CONNECTING);
 		System.out.println("Connecting to "+serverAddress);
@@ -67,6 +74,9 @@ public class Client implements Runnable {
 		}
 	}
 	
+	/**
+	 * Removes all references to connected server.
+	 */
 	public void disconnect() {
 		Handler.players = null;
 		Handler.initPlayers();
@@ -76,6 +86,10 @@ public class Client implements Runnable {
 		Handler.currentScene = new scenes.Connection();
 	}
 
+	/**
+	 * Client thread.
+	 * Receives server info, and sends client info.
+	 */
 	@Override
 	public void run() {
 		while (socket != null && Handler.server == null) {

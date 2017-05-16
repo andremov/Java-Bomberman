@@ -40,16 +40,28 @@ public class Connection extends Scene {
 		this.currentMsg = MSG_ENTER;
 	}
 	
+	/**
+	 * Returns scene ID.
+	 * @return 
+	 */
 	@Override
 	public int getID() {
 		return SCENE_ID;
 	}
 	
+	/**
+	 * Returns all necessary values for a client to duplicate this scene.
+	 * @return 
+	 */
 	@Override
 	public String sceneInit() {
 		return SCENE_ID+"";
 	}
 	
+	/**
+	 * Receives an action code and responds accordingly.
+	 * @param actionCode 
+	 */
 	@Override
 	public void receiveKeyAction(int actionCode) {
 		if (actionCode == CODE_DEL) {
@@ -72,10 +84,18 @@ public class Connection extends Scene {
 		}
 	}
 
+	/**
+	 * Sets the status message to a message code.
+	 */
 	public void setMessage(int message) {
 		this.currentMsg = message;
 	}
 	
+	/**
+	 * Returns this scene's display image.
+	 * @return
+	 * @throws IOException 
+	 */
 	@Override
 	public BufferedImage getDisplay() throws IOException {
 		int size = bomberman.Bomberman.SCREEN_SIZE;

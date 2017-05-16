@@ -50,7 +50,9 @@ public abstract class Player {
 	}
 	
 	public abstract BufferedImage getDisplay();
-	
+	/**
+	 * Sets this player's animation to default stance.
+	 */
 	public void defaultAnimation() {
 		this.setAnimation(ANIM_MOVE_DOWN);
 		this.setFrame(2);
@@ -164,35 +166,67 @@ public abstract class Player {
 	public void setFrame(int frame) {
 		this.frame = frame;
 	}
-        
+    
+	/**
+	 * Returns the raw X coordinate for this player.
+	 * @return 
+	 */
 	public int getRawX() {
 		return this.getCoordinate().getRealX();
 	}
 	
+	/**
+	 * Returns the raw Y coordinate for this player.
+	 * @return 
+	 */
 	public int getRawY() {
 		return this.getCoordinate().getRealY();
 	}
 	
+	/**
+	 * Sets the raw X coordinate for this player.
+	 * @param x 
+	 */
 	public void setRawX(int x) {
 		this.getCoordinate().setRealX(x);
 	}
 	
+	/**
+	 * Sets the raw Y coordinate for this player.
+	 * @param y 
+	 */
 	public void setRawY(int y) {
 		this.getCoordinate().setRealY(y);
 	}
 	
+	/**
+	 * Returns the display X for this player.
+	 * @return 
+	 */
 	public int getImageX() {
 		return this.getCoordinate().getRealX()-DELTA_CENTER_X;
 	}
 	
+	/**
+	 * Return the display Y for this player.
+	 * @return 
+	 */
 	public int getImageY() {
 		return this.getCoordinate().getRealY()-DELTA_CENTER_Y;
 	}
 	
+	/**
+	 * Returns the tile X for this player.
+	 * @return 
+	 */
 	public int getTileX() {
 		return this.getCoordinate().getTileX();
 	}
 	
+	/**
+	 * Returns the tile Y for this player.
+	 * @return 
+	 */
 	public int getTileY() {
 		return this.getCoordinate().getTileY();
 	}

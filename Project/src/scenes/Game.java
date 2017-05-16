@@ -57,6 +57,10 @@ public class Game extends Scene {
 		}
 	}
 	
+	/**
+	 * Sets the map to the given string.
+	 * @param mapString 
+	 */
 	public void init(String mapString) {
 		for (int i = 0; i < mapString.split(",").length; i++) {
 			int x = i%bomberman.Bomberman.SIZE_MAP;
@@ -65,11 +69,19 @@ public class Game extends Scene {
 		}
 	}
 	
+	/**
+	 * Returns this scene ID.
+	 * @return 
+	 */
 	@Override
 	public int getID() {
 		return SCENE_ID;
 	}
 	
+	/**
+	 * Returns all necessary values for clients to copy this scene.
+	 * @return 
+	 */
 	@Override
 	public String sceneInit() {
 		String mapString = "";
@@ -81,6 +93,10 @@ public class Game extends Scene {
 		return SCENE_ID+":"+mapString;
 	}
 	
+	/**
+	 * Receives a string of changes, and applies them.
+	 * @param changes 
+	 */
 	public void applyMapChanges(String changes) {
 		if (!changes.isEmpty()) {
 			for (int i = 0; i < changes.split(";").length; i++) {
@@ -93,6 +109,11 @@ public class Game extends Scene {
 		}
 	}
 	
+	/**
+	 * Receives a string of changes, and applies them.
+	 * These changes are also sent to the handler to be sent to other clients.
+	 * @param changes 
+	 */
 	public void applyServerMapChanges(String changes) {
 		if (!changes.isEmpty()) {
 			for (int i = 0; i < changes.split(";").length; i++) {
@@ -106,11 +127,19 @@ public class Game extends Scene {
 		}
 	}
 	
+	/**
+	 * Sends a change in the map to the handler.
+	 * @param x
+	 * @param y 
+	 */
 	private void sendChange(int x, int y) {
 		String change = x+","+y+"="+gameMap.getTile(x, y).getObject()+";";
 		Handler.addMapChange(change);
 	}
 	
+	/**
+	 * Clears all bombs from the game.
+	 */
 	private void clearBombs() {
 		for (int i = 0; i < numBombs; i++) {
 			activeBombs[i] = null;
@@ -118,11 +147,19 @@ public class Game extends Scene {
 		numBombs = 0;
 	}
 	
+	/**
+	 * Adds a bomb to the game.
+	 * @param newBomb 
+	 */
 	private void addBomb(Bomb newBomb) {
 		activeBombs[numBombs] = newBomb;
 		numBombs++;
 	}
 	
+	/**
+	 * Removes a bomb from the game.
+	 * @param index 
+	 */
 	private void removeBomb(int index) {
 		for (int i = 0; i < numBombs; i++) {
 			activeBombs[i] = activeBombs[i+1];
@@ -130,36 +167,42 @@ public class Game extends Scene {
 		numBombs--;
 	}
 	
-	public void start() {
-		this.globalTick = 0;
-		gameMap = new Map();
-		clearBombs();
-
-		for (int i = 0; i < Handler.NUM_PLAYERS; i++) {
-			if (Handler.players[i].isEnabled()) {
-				int tileDiff = 12;
-				int x = 1 + (i%2)*tileDiff;
-				int y = 1 + ((int)Math.floor(i/2))*tileDiff;
-				Coordinate tileCd = new Coordinate(x,y,Coordinate.TYPE_TILE);
-				((model.RealPlayer)Handler.players[i]).init(tileCd);
-			}
-		}
-	}
-	
+	/**
+	 * Returns true if the given tileX and tileY is a burn tile.
+	 * @param tileX
+	 * @param tileY
+	 * @return 
+	 */
 	public boolean burnTileCheck(int tileX, int tileY) {
 		return gameMap.getTile(tileX, tileY).isBoom();
 	}
 	
+	/**
+	 * Returns true if the given tileX and tileY is a solid tile.
+	 * @param tileX
+	 * @param tileY
+	 * @return 
+	 */
 	public boolean solidTileCheck(int tileX, int tileY) {
 		return gameMap.getTile(tileX, tileY).isBomb() || gameMap.getTile(tileX, tileY).isSolid();
 	}
 	
+	/**
+	 * Returns true if the given tileX and tileY is a power up tile.
+	 * @param tileX
+	 * @param tileY
+	 * @return 
+	 */
 	public int powerTileCheck(int tileX, int tileY) {
 		int powerup = gameMap.getTile(tileX, tileY).takePowerup();
 		sendChange(tileX,tileY);
 		return powerup;
 	}
         
+	/**
+	 * Receives an action code, and responds accordingly.
+	 * @param actionCode 
+	 */
 	@Override
 	public void receiveKeyAction(int actionCode) {
 		int state = actionCode%2;
@@ -177,6 +220,10 @@ public class Game extends Scene {
 		}
 	}
 
+	/**
+	 * Does everything required to add a bomb.
+	 * @param owner 
+	 */
 	private void plantBomb(model.RealPlayer owner){
 		addBomb(new Bomb(owner, (int)(this.globalTick+BOMB_TIMER)));
 		if (gameMap.getTile(owner.getTileX(),owner.getTileY()).isBoom()) {
@@ -187,6 +234,10 @@ public class Game extends Scene {
 		}
 	}
 	
+	/**
+	 * Explode a given index of the bomb array.
+	 * @param index 
+	 */
 	private void explode(int index) {
 		int startX = activeBombs[index].xTile;
 		int startY = activeBombs[index].yTile;
@@ -203,6 +254,14 @@ public class Game extends Scene {
 		flare(max,startX,startY,0,-1);
 	}
 	
+	/**
+	 * Recursive method for adding burn tiles to the map.
+	 * @param fire
+	 * @param tileX
+	 * @param tileY
+	 * @param deltaX
+	 * @param deltaY 
+	 */
 	private void flare(int fire, int tileX, int tileY, int deltaX, int deltaY) {
 		if (fire > 0) {
 			if (gameMap.getTile(tileX+deltaX,tileY+deltaY).isSolid()) {
@@ -233,6 +292,11 @@ public class Game extends Scene {
 		}
 	}
 
+	/**
+	 * Returns scene display.
+	 * @return
+	 * @throws IOException 
+	 */
 	@Override
 	public BufferedImage getDisplay() throws IOException {
 		int mapSize = bomberman.Bomberman.TILE_SIZE*bomberman.Bomberman.SIZE_MAP;

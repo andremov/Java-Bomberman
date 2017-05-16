@@ -33,12 +33,18 @@ public class Coordinate {
 		}
 	}
 
+	/**
+	 * Update real values given the tile values.
+	 */
 	private void updateReals() {
 		int tileSize = bomberman.Bomberman.TILE_SIZE;
 		this.realX = (this.getTileX() * tileSize + (tileSize/2));
 		this.realY = (this.getTileY() * tileSize + (tileSize/2));
 	}
 	
+	/**
+	 * Update tile values given the real values.
+	 */
 	private void updateTiles() {
 		int tileSize = bomberman.Bomberman.TILE_SIZE;
 		this.tileX = ((int) Math.floor(this.getRealX() / tileSize));
@@ -105,6 +111,11 @@ public class Coordinate {
 		updateTiles();
 	}
 
+	/**
+	 * Checks if the tile values for this and the given coordinate are the same.
+	 * @param obj
+	 * @return 
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		boolean value = false;

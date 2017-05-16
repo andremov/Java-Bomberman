@@ -37,9 +37,6 @@ public class Lobby extends Scene {
 		for (int i = 0; i < ready.length; i++) {
 			ready[i] = false;
 		}
-		for (int i = 0; i < Handler.NUM_PLAYERS; i++) {
-			Handler.players[i].defaultAnimation();
-		}
 	}
 	
 	/**
@@ -71,13 +68,12 @@ public class Lobby extends Scene {
 	 */
 	public void setReady(int index, boolean value) {
 		ready[index] = value;
-		checkReady();
 	}
 	
 	/**
 	 * Checks if all players are ready, starts the game.
 	 */
-	private void checkReady() {
+	public void checkReady() {
 		boolean go = true;
 		for (int i = 0; i < ready.length; i++) {
 			if (!ready[i] && Handler.players[i].isEnabled()) {
@@ -86,6 +82,9 @@ public class Lobby extends Scene {
 			}
 		}
 		if (go) {
+			try {
+				Thread.sleep(100);
+			} catch (Exception e) { }
 			Handler.engageGame(wins,roundsPlayed);
 		}
 	}

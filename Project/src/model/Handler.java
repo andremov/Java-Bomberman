@@ -79,33 +79,41 @@ public class Handler {
 	 * If no player is alive, goes to lobby.
 	 * If one player is alive, gives that player a win, and goes to lobby.
 	 */
-	private static void checkGameWin() {
-		int numActivePlayers = 0;
-		for (int i = 0; i < players.length; i++) {
-			if (players[i].isAlive() && players[i].isEnabled()) {
-				numActivePlayers++;
+	public static void checkGameWin() {
+		if (currentScene instanceof Game) {
+			int numActivePlayers = 0;
+			for (int i = 0; i < players.length; i++) {
+				if (players[i].isAlive() && players[i].isEnabled()) {
+					numActivePlayers++;
+				}
 			}
-		}
-		if (numActivePlayers == 1) {
-			int index = 0;
-			while (!players[index].isAlive() || !players[index].isEnabled()) {
-				index++;
+			if (numActivePlayers == 1) {
+				int index = 0;
+				while (!players[index].isAlive() || !players[index].isEnabled()) {
+					index++;
+				}
+				server.wins[index] = server.wins[index] + 1;
+				server.rounds = server.rounds+1;
+
+				try {
+					Thread.sleep(100);
+				} catch (Exception e) { }
+
+				for (int i = 0; i < NUM_PLAYERS; i++) {
+					players[i].defaultAnimation();
+				}
+				currentScene = new Lobby(server.getAddress(), server.wins, server.rounds);
+			} else if (numActivePlayers == 0) {
+
+				try {
+					Thread.sleep(100);
+				} catch (Exception e) { }
+
+				for (int i = 0; i < NUM_PLAYERS; i++) {
+					players[i].defaultAnimation();
+				}
+				currentScene = new Lobby(server.getAddress(), server.wins, server.rounds);
 			}
-			server.wins[index] = server.wins[index] + 1;
-			server.rounds = server.rounds+1;
-			
-			try {
-				Thread.sleep(100);
-			} catch (Exception e) { }
-			
-			currentScene = new Lobby(server.getAddress(), server.wins, server.rounds);
-		} else if (numActivePlayers == 0) {
-			
-			try {
-				Thread.sleep(100);
-			} catch (Exception e) { }
-			
-			currentScene = new Lobby(server.getAddress(), server.wins, server.rounds);
 		}
 	}
 	
@@ -185,6 +193,7 @@ public class Handler {
 	 * @param changes 
 	 */
 	public static void clientReceiveChanges(String changes) {
+		
 		if (changes.contains("!")) {
 			int newScene = Integer.parseInt(changes.split(":")[0].split("!")[1]);
 			if (newScene == Lobby.SCENE_ID) {
@@ -251,17 +260,19 @@ public class Handler {
 	 * @return 
 	 */
 	public static String clientSendChanges() {
-		String changes = pendingMapChanges;
-		pendingMapChanges = "";
+		String changes = currentScene.getID()+":";
 		
-		if (!changes.contains("?")) {
+		if (!pendingMapChanges.contains("?")) {
 			if (currentScene instanceof Lobby) {
 				String ready = "N";
 				if (((Lobby)currentScene).getReady(playerID)) {
 					ready = "Y";
 				}
-				changes = players[playerID].getColor() + "," + ready;
+				changes = changes + players[playerID].getColor() + "," + ready;
 			} else if (currentScene instanceof Game) {
+				changes = changes+pendingMapChanges;
+				pendingMapChanges = "";
+				
 				String player;
 				if (getPlayer().isAlive()) {
 					player = getPlayer().getRawX()+","+getPlayer().getRawY()+",";
@@ -272,6 +283,9 @@ public class Handler {
 				}
 				changes = changes + "#" + player;
 			}
+		} else {
+			pendingMapChanges = "";
+			changes = "?";
 		}
 		
 		return changes;
@@ -283,38 +297,48 @@ public class Handler {
 	 */
 	public static void serverReceiveChanges(String[] changes) {
 		
-		if (currentScene instanceof Lobby) {
-			for (int i = 0; i < changes.length; i++) {
-				if (changes[i] != null) {
-					if (!changes[i].isEmpty() && i != playerID) {
-						int colorCode = Integer.parseInt(changes[i].split(",")[0]);
-						Handler.players[i].setColor(colorCode);
-						boolean ready = changes[i].split(",")[1].compareTo("Y")==0;
-						((Lobby)currentScene).setReady(i, ready);
-					}
+		for (int i = 0; i < changes.length; i++) {
+			if (changes[i] == null) {
+				changes[i] = "";
+			}
+			if (!changes[i].isEmpty()) {
+				if (Integer.parseInt(changes[i].split(":")[0]) == currentScene.getID()) {
+					changes[i] = changes[i].split(":")[1];
+				} else {
+					changes[i] = "";
 				}
 			}
+		}
+		
+		if (currentScene instanceof Lobby) {
+			for (int i = 0; i < changes.length; i++) {
+				if (!changes[i].isEmpty() && i != playerID) {
+					int colorCode = Integer.parseInt(changes[i].split(",")[0]);
+					Handler.players[i].setColor(colorCode);
+					boolean ready = changes[i].split(",")[1].compareTo("Y")==0;
+					((Lobby)currentScene).setReady(i, ready);
+				}
+			}
+			((Lobby)currentScene).checkReady();
 		} else if (currentScene instanceof Game) {
 			for (int i = 0; i < changes.length; i++) {
-				if (changes[i] != null) {
-					if (!changes[i].isEmpty()) {
-						String mapChanges = changes[i].split("#")[0];
-						String playerChanges = changes[i].split("#")[1];
-						getGame().applyServerMapChanges(mapChanges);
-						if (i != playerID) {
-							if (playerChanges.split(";")[0].compareTo("DEAD")==0) {
-								players[i].setAlive(false);
-							} else {
-								int x = Integer.parseInt(playerChanges.split(";")[0].split(",")[0]);
-								int y = Integer.parseInt(playerChanges.split(";")[0].split(",")[1]);
-								int animation = Integer.parseInt(playerChanges.split(";")[0].split(",")[2]);
-								boolean moving = playerChanges.split(";")[0].split(",")[3].compareTo("Y") == 0;
+				if (!changes[i].isEmpty()) {
+					String mapChanges = changes[i].split("#")[0];
+					String playerChanges = changes[i].split("#")[1];
+					getGame().applyServerMapChanges(mapChanges);
+					if (i != playerID) {
+						if (playerChanges.split(";")[0].compareTo("DEAD")==0) {
+							players[i].setAlive(false);
+						} else {
+							int x = Integer.parseInt(playerChanges.split(";")[0].split(",")[0]);
+							int y = Integer.parseInt(playerChanges.split(";")[0].split(",")[1]);
+							int animation = Integer.parseInt(playerChanges.split(";")[0].split(",")[2]);
+							boolean moving = playerChanges.split(";")[0].split(",")[3].compareTo("Y") == 0;
 
-								players[i].setRawX(x);
-								players[i].setRawY(y);
-								players[i].setAnimation(animation);
-								players[i].setMoving(moving);
-							}
+							players[i].setRawX(x);
+							players[i].setRawY(y);
+							players[i].setAnimation(animation);
+							players[i].setMoving(moving);
 						}
 					}
 				}

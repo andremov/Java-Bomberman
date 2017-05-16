@@ -104,7 +104,16 @@ public class Game extends Scene {
 				int x = Integer.parseInt(change.split("=")[0].split(",")[0]);
 				int y = Integer.parseInt(change.split("=")[0].split(",")[1]);
 				int obj = Integer.parseInt(change.split("=")[1]);
+				boolean wasBomb = gameMap.getTile(x,y).isBomb();
 				gameMap.getTile(x, y).setObject(obj);
+				boolean isBoom = gameMap.getTile(x,y).isBoom();
+				if (isBoom && wasBomb) {
+					for (int j = 0; j < numBombs; j++) {
+						if (x == activeBombs[j].xTile && y == activeBombs[j].yTile){
+							explode(j);
+						}
+					}
+				}
 			}
 		}
 	}
@@ -135,16 +144,6 @@ public class Game extends Scene {
 	private void sendChange(int x, int y) {
 		String change = x+","+y+"="+gameMap.getTile(x, y).getObject()+";";
 		Handler.addMapChange(change);
-	}
-	
-	/**
-	 * Clears all bombs from the game.
-	 */
-	private void clearBombs() {
-		for (int i = 0; i < numBombs; i++) {
-			activeBombs[i] = null;
-		}
-		numBombs = 0;
 	}
 	
 	/**
@@ -211,7 +210,6 @@ public class Game extends Scene {
 		if (action == KeyHandler.ACTION_A && state == KeyHandler.MOD_RELEASE) {
 			// BOMB
 			if (Handler.getPlayer().plantBomb()) {
-                
 				plantBomb(Handler.getPlayer());
 			}
 		} else {
@@ -269,10 +267,24 @@ public class Game extends Scene {
 					gameMap.getTile(tileX+deltaX,tileY+deltaY).destroyWall();
 				}
 			} else if (gameMap.getTile(tileX+deltaX,tileY+deltaY).isBomb()) {
+				boolean foundIt = false;
 				for (int i = 0; i < numBombs; i++) {
 					if (tileX+deltaX == activeBombs[i].xTile && tileY+deltaY == activeBombs[i].yTile){
 						explode(i);
+						foundIt = true;
 					}
+				}
+				if (!foundIt) {
+					int boomX = deltaX;
+					int boomY = deltaY;
+					if (fire == 1) {
+						if (Math.abs(boomX) == 1) {
+							boomX = boomX*2;
+						} else {
+							boomY = boomY*2;
+						}
+					}
+					gameMap.getTile(tileX+deltaX, tileY+deltaY).setBoom(boomX, boomY);
 				}
 			} else {
 				int boomX = deltaX;

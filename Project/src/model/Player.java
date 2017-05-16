@@ -56,6 +56,7 @@ public abstract class Player {
 	public void defaultAnimation() {
 		this.setAnimation(ANIM_MOVE_DOWN);
 		this.setFrame(2);
+		this.moving = false;
 	}
 	
 	/**

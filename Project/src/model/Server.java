@@ -68,6 +68,9 @@ public class Server implements Runnable {
 	public void stopServer() {
 		System.out.println("Stopping server...");
 		running = false;
+		try {
+			socket.close();
+		} catch (Exception e) { }
 		l.stopListening();
 		Handler.initPlayers();
 	}
@@ -86,8 +89,10 @@ public class Server implements Runnable {
 				if (Handler.players[i].isEnabled()) {
 					if (reqInfo[i]) {
 						reqInfo[i] = false;
+//						System.out.println("Sending scene init");
 						Handler.players[i].getOut().println("!"+Handler.currentScene.sceneInit());
 					} else {
+//						System.out.println("Sending "+changesToClients);
 						Handler.players[i].getOut().println(changesToClients);
 					}
 					
@@ -97,6 +102,7 @@ public class Server implements Runnable {
 						if (changesFromClients[i] == null) {
 							changesFromClients[i] = "";
 							System.out.println("Forcing player "+i+" disconnection.");
+							Handler.checkGameWin();
 							Handler.setGhost(i);
 							if (Handler.spaceAvailable()) {
 								l.listen();
@@ -114,6 +120,7 @@ public class Server implements Runnable {
 						if (Handler.players[i].timeOuts > 5) {
 							System.out.println("Player "+i+" timed out!");
 							System.out.println("Player "+i+" disconnected.");
+							Handler.checkGameWin();
 							Handler.setGhost(i);
 							if (Handler.spaceAvailable()) {
 								l.listen();

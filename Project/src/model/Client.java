@@ -80,6 +80,9 @@ public class Client implements Runnable {
 	public void disconnect() {
 		Handler.players = null;
 		Handler.initPlayers();
+		try {
+			socket.close();
+		} catch (Exception e) { }
 		socket = null;
 		in = null;
 		out = null;
@@ -95,6 +98,7 @@ public class Client implements Runnable {
 		while (socket != null && Handler.server == null) {
 			try {
 				String changesFromServer = in.readLine();
+//				System.out.println("Received "+changesFromServer);
 				Handler.clientReceiveChanges(changesFromServer);
 				
 				timeOuts = 0;

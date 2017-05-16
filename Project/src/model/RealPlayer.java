@@ -216,7 +216,7 @@ public class RealPlayer extends Player {
 	 * @return 
 	 */
 	public boolean plantBomb() {
-		boolean canPlant = this.bombsLeft > 0;
+		boolean canPlant = this.bombsLeft > 0 && isAlive();
 		if (canPlant) {
 			this.bombsLeft--;
 			this.cantCollideWith = new Coordinate(this.getCoordinate().getTileX(),this.getCoordinate().getTileY(),Coordinate.TYPE_TILE);

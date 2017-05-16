@@ -61,16 +61,18 @@ public class Listener implements Runnable {
 	public void run() {
 		while(listening) {
 			Socket newSocket = null;
-			try {
-				newSocket = socket.accept();
-				if (newSocket != null) {
-					System.out.println("New connection.");
-					try {
-						newSocket.setSoTimeout(100);
-						sendSocket(newSocket);
-					} catch (IOException ex) { }
-				}
-			} catch (Exception e) { }
+			if (!(Handler.currentScene instanceof scenes.Game)) {
+				try {
+					newSocket = socket.accept();
+					if (newSocket != null) {
+						System.out.println("New connection.");
+						try {
+							newSocket.setSoTimeout(100);
+							sendSocket(newSocket);
+						} catch (IOException ex) { }
+					}
+				} catch (Exception e) { }
+			}
 		}
 	}
 	

@@ -113,6 +113,8 @@ public class Game extends Scene {
 							explode(j);
 						}
 					}
+				} else if (wasBomb) {
+					gameMap.getTile(x, y).setObject(Tile.OBJECT_BOMB);
 				}
 			}
 		}

@@ -120,8 +120,8 @@ public class Server implements Runnable {
 						if (Handler.players[i].timeOuts > 5) {
 							System.out.println("Player "+i+" timed out!");
 							System.out.println("Player "+i+" disconnected.");
-							Handler.checkGameWin();
 							Handler.setGhost(i);
+							Handler.checkGameWin();
 							if (Handler.spaceAvailable()) {
 								l.listen();
 							}

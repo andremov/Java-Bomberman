@@ -29,7 +29,6 @@ public class Handler {
 	public static Client client;
 	public static int playerID;
 	public static String pendingMapChanges;
-	public static String pendingSoundEffects;
 	
 	public Handler() {
 		client = new Client();
@@ -239,14 +238,14 @@ public class Handler {
 							} else if (playerChanges.split(";")[i].compareTo("DEAD")==0) {
 								Handler.players[i].setAlive(false);
 							} else {
-									int x = Integer.parseInt(playerChanges.split(";")[i].split(",")[0]);
-									int y = Integer.parseInt(playerChanges.split(";")[i].split(",")[1]);
-									int animation = Integer.parseInt(playerChanges.split(";")[i].split(",")[2]);
-									boolean moving = playerChanges.split(";")[i].split(",")[3].compareTo("Y") == 0;
-									players[i].setRawX(x);
-									players[i].setRawY(y);
-									players[i].setAnimation(animation);
-									players[i].setMoving(moving);
+								int x = Integer.parseInt(playerChanges.split(";")[i].split(",")[0]);
+								int y = Integer.parseInt(playerChanges.split(";")[i].split(",")[1]);
+								int animation = Integer.parseInt(playerChanges.split(";")[i].split(",")[2]);
+								boolean moving = playerChanges.split(";")[i].split(",")[3].compareTo("Y") == 0;
+								players[i].setRawX(x);
+								players[i].setRawY(y);
+								players[i].setAnimation(animation);
+								players[i].setMoving(moving);
 							}
 						}
 					}

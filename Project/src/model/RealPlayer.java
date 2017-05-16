@@ -23,11 +23,9 @@ public class RealPlayer extends Player {
 	private int xDelta;
 	private int yDelta;
 	private boolean firstX;
-	private Coordinate cantCollideWith;
 	
 	public RealPlayer() {
 		super();
-		this.cantCollideWith = null;
 	}
 	
 	/**
@@ -219,7 +217,6 @@ public class RealPlayer extends Player {
 		boolean canPlant = this.bombsLeft > 0 && isAlive();
 		if (canPlant) {
 			this.bombsLeft--;
-			this.cantCollideWith = new Coordinate(this.getCoordinate().getTileX(),this.getCoordinate().getTileY(),Coordinate.TYPE_TILE);
 		}
 		return canPlant;
 	}
